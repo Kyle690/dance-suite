@@ -1,0 +1,15 @@
+enum LicenseType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+model user_license {
+  uid               String      @id @unique @default(uuid()) @db.Uuid
+  created           DateTime    @default(now())
+  updated           DateTime    @updatedAt
+  user_id           String      @db.Uuid // Clerk Uid
+  license_type      LicenseType @default(FREE)
+  expiration_date   DateTime?
+  stripe_invoice_id String?
+}

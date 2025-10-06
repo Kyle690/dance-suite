@@ -1,0 +1,24 @@
+enum CompetitionUserRole {
+  ADMIN
+  SCRUTINEER
+  JUDGE
+  OFFICIAL
+  VIEWER
+}
+
+model competition_users {
+  uid            String              @id @unique @default(uuid()) @db.Uuid
+  created        DateTime            @default(now())
+  updated        DateTime            @updatedAt
+  competition_id String              @db.Uuid
+  competition    competition         @relation(fields: [competition_id], references: [uid])
+  user_id        String              @db.Uuid // Clerk Uid
+  role           CompetitionUserRole @default(VIEWER)
+
+  // relationships
+  heat_reviewed_by  heat[]    @relation("competition_user_heat_reviewed_by")
+  heat_checked_by   heat[]    @relation("competition_user_heat_checked_by")
+  dancer_created_by dancers[] @relation("dancer_created_by")
+  dancer_updated_by dancers[] @relation("dancer_updated_by")
+  dancer_deleted_by dancers[] @relation("dancer_deleted_by")
+}

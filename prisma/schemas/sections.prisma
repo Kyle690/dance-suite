@@ -1,0 +1,59 @@
+enum CompetitiveType {
+  COMPETITIVE
+  SOCIAL
+  MIXED_COMPETITIVE
+}
+
+enum SectionAgeGroup {
+  TINY_TOTS
+  JUVENILE
+  JUNIOR
+  YOUTH
+  ADULT
+  SENIOR
+  AMATEUR
+  PROFFESSIONAL
+  MASTERS
+}
+
+enum SectionLevel {
+  BEGINNER
+  BRONZE
+  SILVER
+  GOLD
+  NOVICE
+  PRE_CHAMP
+  RISING_STAR
+  CHAMPIONSHIP
+}
+
+enum SectionCategory {
+  BALLROOM
+  LATIN
+  TEN_DANCE
+  STANDARD
+  HIP_HOP
+  FREESTYLE
+  TRADITIONAL
+}
+enum SectionEntryType {
+  SOLO
+  DUO
+  COUPLE
+  GROUP
+}
+
+model sections {
+  uid              String            @id @unique @default(uuid()) @db.Uuid
+  created          DateTime          @default(now())
+  updated          DateTime          @updatedAt
+  competition_id   String?           @db.Uuid
+  competition      competition?      @relation(fields: [competition_id], references: [uid])
+  name             String?
+  age_group        SectionAgeGroup?
+  level            SectionLevel?
+  entry_type       SectionEntryType?
+  category         SectionCategory?
+  custom_name      Boolean           @default(false)
+  competitive_type CompetitiveType   @default(COMPETITIVE)
+}

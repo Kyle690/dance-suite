@@ -1,0 +1,18 @@
+enum HeatMarkInputType {
+  JUDGE
+  SCRUTINEER
+}
+
+model heat_marks {
+  uid            String            @id @unique @default(uuid()) @db.Uuid
+  created        DateTime          @default(now())
+  updated        DateTime          @updatedAt
+  heat_id        String            @db.Uuid
+  heat           heat              @relation(fields: [heat_id], references: [uid])
+  adjudicator_id String            @db.Uuid
+  adjudicator    adjudicator       @relation(fields: [adjudicator_id], references: [uid])
+  ip_address     String?
+  signature      String?
+  check_sum      String?
+  input_type     HeatMarkInputType @default(JUDGE)
+}

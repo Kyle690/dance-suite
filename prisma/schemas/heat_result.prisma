@@ -1,0 +1,24 @@
+model heat_result {
+  uid           String            @id @unique @default(uuid()) @db.Uuid
+  created       DateTime          @default(now())
+  updated       DateTime          @updatedAt
+  heat_id       String            @db.Uuid
+  section_id    String            @db.Uuid
+  section       sections          @relation(fields: [section_id], references: [uid])
+  heat          heat              @relation(fields: [heat_id], references: [uid])
+  created_by_id String            @db.Uuid
+  created_by    competition_users @relation(fields: [created_by_id], references: [uid])
+}
+
+model heat_result_dancer {
+  uid            String      @id @unique @default(uuid()) @db.Uuid
+  created        DateTime    @default(now())
+  updated        DateTime    @updatedAt
+  dancer_id      String      @db.Uuid
+  dancer         dancers     @relation(fields: [dancer_id], references: [uid])
+  heat_result_id String      @db.Uuid
+  heat_result    heat_result @relation(fields: [heat_result_id], references: [uid])
+  no_callbacks   Int         @default(0)
+  callback       Boolean     @default(false)
+  postiion       Int?
+}

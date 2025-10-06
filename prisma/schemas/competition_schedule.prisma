@@ -1,0 +1,12 @@
+model competition_schedule {
+  uid            String      @id @unique @default(uuid()) @db.Uuid
+  created        DateTime    @default(now())
+  updated        DateTime    @updatedAt
+  competition_id String      @db.Uuid
+  competition    competition @relation(fields: [competition_id], references: [uid])
+  title          String?
+  description    String?
+  start_time     DateTime?
+  end_time       DateTime?
+  venue          String?
+}

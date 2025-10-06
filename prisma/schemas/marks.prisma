@@ -1,0 +1,13 @@
+model marks {
+  uid           String     @id @unique @default(uuid()) @db.Uuid
+  created       DateTime   @default(now())
+  updated       DateTime   @updatedAt
+  dancer_number Int
+  dancer_id     String?    @db.Uuid
+  dancer        dancers?   @relation(fields: [dancer_id], references: [uid])
+  heat_mark_id  String     @db.Uuid
+  heat_mark     heat_marks @relation(fields: [heat_mark_id], references: [uid])
+  mark          Int?
+  percentage    Int?
+  dance         String
+}

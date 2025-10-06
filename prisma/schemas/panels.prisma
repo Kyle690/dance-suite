@@ -1,0 +1,21 @@
+model panels {
+  uid            String      @id @unique @default(uuid()) @db.Uuid
+  created        DateTime    @default(now())
+  updated        DateTime    @updatedAt
+  competition_id String      @db.Uuid
+  competition    competition @relation(fields: [competition_id], references: [uid])
+  name           String?     @db.Text
+}
+
+model panels_adjudicators {
+  uid            String      @id @unique @default(uuid()) @db.Uuid
+  created        DateTime    @default(now())
+  updated        DateTime    @updatedAt
+  panel_id       String      @db.Uuid
+  panel          panels      @relation(fields: [panel_id], references: [uid])
+  adjudicator_id String      @db.Uuid
+  adjudicator    adjudicator @relation(fields: [adjudicator_id], references: [uid])
+  is_deleted     Boolean     @default(false)
+  deleted_at     DateTime?
+  deleted_by_id  String?     @db.Uuid
+}

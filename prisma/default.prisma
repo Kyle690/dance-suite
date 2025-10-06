@@ -1,0 +1,18 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider               = "prisma-dbml-generator"
+  output                 = "./output"
+  outputName             = "database.dbml"
+  projectName            = "DanceSuite"
+  projectDatabaseType    = "PostgreSQL"
+  projectDatabaseVersion = "1.0.0"
+  includeRelationFields  = false
+}

@@ -6,20 +6,44 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "database:schema": "sh generate-schema.sh",
+    "database:push": "npx prisma db push"
   },
   "dependencies": {
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@hookform/resolvers": "^5.2.2",
+    "@mui/icons-material": "^7.3.2",
+    "@mui/material": "^7.3.2",
+    "@mui/material-nextjs": "^7.3.2",
+    "@mui/x-data-grid": "^8.12.1",
+    "@mui/x-date-pickers": "^8.12.0",
+    "@prisma/client": "^6.16.3",
+    "@tanstack/react-query": "^5.90.2",
+    "@tanstack/react-query-devtools": "^5.90.2",
+    "@toolpad/core": "^0.16.0",
+    "dotenv": "^17.2.3",
+    "lodash": "^4.17.21",
+    "next": "15.5.4",
+    "next-safe-action": "^8.0.10",
+    "notistack": "^3.0.2",
+    "prisma-dbml-generator": "^0.12.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "next": "15.5.4"
+    "recharts": "^3.2.1",
+    "zod": "^4.1.11"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@types/lodash": "^4.17.20",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
-    "@eslint/eslintrc": "^3"
+    "prisma": "^6.16.3",
+    "typescript": "^5"
   }
 }

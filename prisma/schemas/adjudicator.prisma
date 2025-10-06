@@ -1,0 +1,16 @@
+model adjudicator {
+  uid            String      @id @unique @default(uuid()) @db.Uuid
+  created        DateTime    @default(now())
+  updated        DateTime    @updatedAt
+  name           String
+  letter         String
+  login_code     String?
+  token          String?
+  last_login     DateTime?
+  email          String?
+  competition_id String      @db.Uuid
+  competition    competition @relation(fields: [competition_id], references: [uid])
+  is_deleted     Boolean     @default(false)
+  deleted_at     DateTime?
+  deleted_by_id  String?     @db.Uuid
+}
