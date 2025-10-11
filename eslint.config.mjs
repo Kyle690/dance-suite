@@ -80,7 +80,8 @@ const eslintConfig = [
                 }
             ],
             "react/jsx-closing-bracket-location": [ "error", "line-aligned" ],
-            "import/no-anonymous-default-export": "off"
+            "import/no-anonymous-default-export": "off",
+            "@typescript-eslint/no-explicit-any":"off"
         }
     },
 ];

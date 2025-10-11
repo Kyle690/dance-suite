@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { getCompetition } from "@/app/server/competitions";
+import { getAdjudicators, getCompetition } from "@/app/server/competitions";
 import { IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
 import { Settings, ExitToAppOutlined, Edit, Delete, People, FormatListNumberedRtl } from '@mui/icons-material'
 import MenuButtons from "@/app/components/layout/MenuButtons";
@@ -9,6 +9,8 @@ import { competition } from "@prisma/client";
 import { useDialogs } from "@toolpad/core";
 import CompetitionDetailsDialog from "@/app/components/dialogs/competition/CompetitionDetailsDialog";
 import AdjudicatorsDialog from "@/app/components/dialogs/competition/AdjudicatorsDialog";
+import PanelsDialog from "@/app/components/dialogs/competition/PanelsDialog";
+import { useAdjudicators } from "@/app/hooks/useAdjudicators";
 
 type CustomToolbarActionProps = {
     competition?:competition
@@ -20,6 +22,11 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
 
     const router = useRouter()
     const dialogs = useDialogs();
+
+    const {
+        data:adjudicators,
+        isLoading:adjudicatorsLoading
+    }=useAdjudicators(String(competition?.uid))
 
     return (
         <Stack
@@ -37,7 +44,8 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                             await dialogs.open(CompetitionDetailsDialog,competition)
                         },
                         icon:<Edit color={'primary'}/>,
-                        color:'primary'
+                        color:'primary',
+                        disabled:!competition || adjudicatorsLoading
                     },
                     {
                         label:'Delete',
@@ -56,14 +64,16 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                     {
                         label:'Adjudicators',
                         onClick:async()=>{
-                            dialogs.open(AdjudicatorsDialog,undefined)
+                            dialogs.open(AdjudicatorsDialog,adjudicators?adjudicators:undefined)
                         },
                         icon:<People color={'primary'}/>,
                         color:'primary'
                     },
                     {
                         label:'Panels',
-                        onClick:()=>{},
+                        onClick:async()=>{
+                            await dialogs.open(PanelsDialog)
+                        },
                         icon:<FormatListNumberedRtl color={'secondary'}/>,
                         color:'secondary',
                     }

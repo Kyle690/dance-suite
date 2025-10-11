@@ -25,6 +25,9 @@ Table panels {
   updated DateTime [not null]
   competition_id String [not null]
   name String
+  is_deleted Boolean [not null, default: false]
+  deleted_at DateTime
+  deleted_by_id String
 }
 
 Table panels_adjudicators {

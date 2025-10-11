@@ -38,6 +38,9 @@ model panels {
   competition_id      String                @db.Uuid
   competition         competition           @relation(fields: [competition_id], references: [uid])
   name                String?               @db.Text
+  is_deleted          Boolean               @default(false)
+  deleted_at          DateTime?
+  deleted_by_id       String?               @db.Uuid
   panels_adjudicators panels_adjudicators[]
   heat                heat[]
 }
