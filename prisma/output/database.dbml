@@ -316,11 +316,11 @@ Ref: panels_adjudicators.panel_id > panels.uid
 
 Ref: panels_adjudicators.adjudicator_id > adjudicator.uid
 
-Ref: section_result.section_id > sections.uid
+Ref: section_result.section_id > sections.uid [delete: Cascade]
 
 Ref: section_result.dancer_id > dancers.uid
 
-Ref: heat_result.section_id > sections.uid
+Ref: heat_result.section_id > sections.uid [delete: Cascade]
 
 Ref: heat_result.heat_id > heat.uid
 
@@ -328,21 +328,21 @@ Ref: heat_result.created_by_id > competition_users.uid
 
 Ref: heat_result_dancer.dancer_id > dancers.uid
 
-Ref: heat_result_dancer.heat_result_id > heat_result.uid
+Ref: heat_result_dancer.heat_result_id > heat_result.uid [delete: Cascade]
 
-Ref: heat_marks.heat_id > heat.uid
+Ref: heat_marks.heat_id > heat.uid [delete: Cascade]
 
 Ref: heat_marks.adjudicator_id > adjudicator.uid
 
 Ref: adjudicator.competition_id > competition.uid
 
-Ref: marks.dancer_id > dancers.uid
+Ref: marks.dancer_id > dancers.uid [delete: Cascade]
 
-Ref: marks.heat_mark_id > heat_marks.uid
+Ref: marks.heat_mark_id > heat_marks.uid [delete: Cascade]
 
 Ref: sections.competition_id > competition.uid
 
-Ref: heat.section_id > sections.uid
+Ref: heat.section_id > sections.uid [delete: Cascade]
 
 Ref: heat.panel_id > panels.uid
 
@@ -356,7 +356,7 @@ Ref: competition_users.competition_id > competition.uid
 
 Ref: competition_notes.competition_id > competition.uid
 
-Ref: dancers.section_id > sections.uid
+Ref: dancers.section_id > sections.uid [delete: Cascade]
 
 Ref: dancers.created_by_id > competition_users.uid
 

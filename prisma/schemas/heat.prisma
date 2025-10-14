@@ -23,7 +23,7 @@ model heat {
   created        DateTime              @default(now())
   updated        DateTime              @updatedAt
   section_id     String                @db.Uuid
-  section        sections              @relation(fields: [section_id], references: [uid])
+  section        sections              @relation(fields: [section_id], references: [uid], onDelete: Cascade)
   order          Int?
   item_no        String
   status         HeatStatus            @default(DRAFT)

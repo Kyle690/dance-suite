@@ -3,7 +3,7 @@ model section_result {
   created       DateTime @default(now())
   updated       DateTime @updatedAt
   section_id    String   @db.Uuid
-  section       sections @relation(fields: [section_id], references: [uid])
+  section       sections @relation(fields: [section_id], references: [uid], onDelete: Cascade)
   dancer_id     String   @db.Uuid
   dancer        dancers  @relation(fields: [dancer_id], references: [uid])
   dancer_number Int

@@ -36,6 +36,7 @@ enum SectionCategory {
   FREESTYLE
   TRADITIONAL
 }
+
 enum SectionEntryType {
   SOLO
   DUO

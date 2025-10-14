@@ -125,6 +125,7 @@ const Competitions = ()=>{
                         <DataGrid
                             rows={data}
                             columns={columns}
+                            density={'compact'}
                             getRowId={(row)=>row.uid}
                             showToolbar
                             sx={{

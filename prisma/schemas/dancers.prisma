@@ -15,7 +15,7 @@ model dancers {
   region        String?
   country       String?
   section_id    String              @db.Uuid
-  section       sections            @relation(fields: [section_id], references: [uid])
+  section       sections            @relation(fields: [section_id], references: [uid], onDelete: Cascade)
   meta_data     Json?
   created_type  DancerCreatedByType @default(SCRUTINEER)
   created_by_id String?             @db.Uuid

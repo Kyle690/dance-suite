@@ -63,7 +63,7 @@ model section_result {
   created       DateTime @default(now())
   updated       DateTime @updatedAt
   section_id    String   @db.Uuid
-  section       sections @relation(fields: [section_id], references: [uid])
+  section       sections @relation(fields: [section_id], references: [uid], onDelete: Cascade)
   dancer_id     String   @db.Uuid
   dancer        dancers  @relation(fields: [dancer_id], references: [uid])
   dancer_number Int
@@ -76,7 +76,7 @@ model heat_result {
   updated            DateTime             @updatedAt
   heat_id            String               @db.Uuid
   section_id         String               @db.Uuid
-  section            sections             @relation(fields: [section_id], references: [uid])
+  section            sections             @relation(fields: [section_id], references: [uid], onDelete: Cascade)
   heat               heat                 @relation(fields: [heat_id], references: [uid])
   created_by_id      String               @db.Uuid
   created_by         competition_users    @relation(fields: [created_by_id], references: [uid])
@@ -90,7 +90,7 @@ model heat_result_dancer {
   dancer_id      String      @db.Uuid
   dancer         dancers     @relation(fields: [dancer_id], references: [uid])
   heat_result_id String      @db.Uuid
-  heat_result    heat_result @relation(fields: [heat_result_id], references: [uid])
+  heat_result    heat_result @relation(fields: [heat_result_id], references: [uid], onDelete: Cascade)
   no_callbacks   Int         @default(0)
   callback       Boolean     @default(false)
   postiion       Int?
@@ -106,7 +106,7 @@ model heat_marks {
   created        DateTime          @default(now())
   updated        DateTime          @updatedAt
   heat_id        String            @db.Uuid
-  heat           heat              @relation(fields: [heat_id], references: [uid])
+  heat           heat              @relation(fields: [heat_id], references: [uid], onDelete: Cascade)
   adjudicator_id String            @db.Uuid
   adjudicator    adjudicator       @relation(fields: [adjudicator_id], references: [uid])
   ip_address     String?
@@ -157,9 +157,9 @@ model marks {
   updated       DateTime   @updatedAt
   dancer_number Int
   dancer_id     String?    @db.Uuid
-  dancer        dancers?   @relation(fields: [dancer_id], references: [uid])
+  dancer        dancers?   @relation(fields: [dancer_id], references: [uid], onDelete: Cascade)
   heat_mark_id  String     @db.Uuid
-  heat_mark     heat_marks @relation(fields: [heat_mark_id], references: [uid])
+  heat_mark     heat_marks @relation(fields: [heat_mark_id], references: [uid], onDelete: Cascade)
   mark          Int?
   percentage    Int?
   dance         String
@@ -255,7 +255,7 @@ model heat {
   created        DateTime              @default(now())
   updated        DateTime              @updatedAt
   section_id     String                @db.Uuid
-  section        sections              @relation(fields: [section_id], references: [uid])
+  section        sections              @relation(fields: [section_id], references: [uid], onDelete: Cascade)
   order          Int?
   item_no        String
   status         HeatStatus            @default(DRAFT)
@@ -362,7 +362,7 @@ model dancers {
   region             String?
   country            String?
   section_id         String               @db.Uuid
-  section            sections             @relation(fields: [section_id], references: [uid])
+  section            sections             @relation(fields: [section_id], references: [uid], onDelete: Cascade)
   meta_data          Json?
   created_type       DancerCreatedByType  @default(SCRUTINEER)
   created_by_id      String?              @db.Uuid
