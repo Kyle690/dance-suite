@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { DialogProps } from "@toolpad/core";
+import React, { useMemo, useState } from 'react';
+import { DialogProps, useDialogs } from "@toolpad/core";
 import {
     Dialog,
     DialogTitle,
@@ -13,12 +13,16 @@ import {
     TableRow, Table, TableBody, CircularProgress
 } from "@mui/material";
 import { sections } from "@prisma/client";
-import { Close } from "@mui/icons-material";
+import { AddCircle, Close,  Edit, ImportExport } from "@mui/icons-material";
 import SectionDancers from "@/app/components/dialogs/competition/section/_components/SectionDancers";
 import { grey } from "@mui/material/colors";
 import SectionDetails from "@/app/components/dialogs/competition/section/_components/SectionDetails";
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { getCompetitionSection } from "@/app/server/competitions";
+import SectionHeats from "@/app/components/dialogs/competition/section/_components/SectionHeats";
+import MenuButtons, { MenuButtonsProps } from "@/app/components/layout/MenuButtons";
+import SectionDetailsDialog from "@/app/components/dialogs/competition/SectionDetailsDialog";
+import HeatDialog from "@/app/components/dialogs/competition/section/HeatDialog";
 
 type SectionDialogProps = {}
 
@@ -46,6 +50,55 @@ const SectionDialog: React.FC<DialogProps<sections>> = ({
         }
     })
 
+    const dialogs = useDialogs()
+
+    const activeButtons: MenuButtonsProps['buttons'] = useMemo(()=>{
+        if(activeTab===0){
+            return [
+                {
+                    label: 'Edit',
+                    icon: <Edit color={'primary'}/>,
+                    color: 'primary',
+                    onClick:async()=>{
+                        await dialogs.open(SectionDetailsDialog,data as sections );
+                        refetch();
+                    }
+                }
+            ]
+        }
+        if(activeTab===1){
+            return [
+                {
+                    label:'Add Dancer',
+                    icon:<AddCircle color={'primary'}/>,
+                    color:'primary',
+                    onClick:()=>{}
+                },
+                {
+                    label:'Import Dancers',
+                    icon:<ImportExport color={'secondary'}/>,
+                    color:'secondary',
+                    onClick:()=>{}
+                }
+            ]
+        }
+        if(activeTab===2){
+            return [
+                {
+                    label:'Add Heat',
+                    icon:<AddCircle color={'primary'}/>,
+                    color:'primary',
+                    onClick:async()=>{
+                        await dialogs.open(HeatDialog,{
+                            section_id:payload.uid
+                        })
+                    }
+                }
+            ]
+        }
+        return []
+    },[ activeTab, dialogs ])
+
     return (
         <Dialog
             open={open}
@@ -60,7 +113,7 @@ const SectionDialog: React.FC<DialogProps<sections>> = ({
                     <Typography
                         variant={'h5'}
                     >
-                        {payload?.name}
+                        {data?.name}
                     </Typography>
                     <IconButton
                         onClick={()=>onClose()}
@@ -86,19 +139,34 @@ const SectionDialog: React.FC<DialogProps<sections>> = ({
                     </Box>
                 ):(
                     <React.Fragment>
-                        <Tabs
-                            value={activeTab}
-                            onChange={(_,newValue)=>setActiveTab(newValue)}
+                        <Stack
+                            direction={'row'}
+                            alignItems={'center'}
+                            justifyContent={'space-between'}
                         >
-                            <Tab label={'Details'}/>
-                            <Tab label={'Dancers'}/>
-                            <Tab label={'Heats'}/>
-                        </Tabs>
+                            <Tabs
+                                value={activeTab}
+                                onChange={(_,newValue)=>setActiveTab(newValue)}
+                            >
+                                <Tab label={'Details'}/>
+                                <Tab label={'Dancers'}/>
+                                <Tab label={'Heats'}/>
+                            </Tabs>
+                            <MenuButtons
+                                name={'section-dialog'}
+                                id={payload.uid}
+                                buttons={activeButtons}
+                            />
+                        </Stack>
+
                         {activeTab===0 && (
                             <SectionDetails data={data as sections}/>
                         )}
                         {activeTab===1 && (
                             <SectionDancers sectionId={payload?.uid}/>
+                        )}
+                        {activeTab===2 &&(
+                            <SectionHeats sectionId={payload?.uid}/>
                         )}
                     </React.Fragment>
                 )}

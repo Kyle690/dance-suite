@@ -10,6 +10,7 @@ import { deletePanel, getPanels } from "@/app/server/competitions";
 import MenuButtons from "@/app/components/layout/MenuButtons";
 import { PanelSchemaType } from "@/app/schemas/PanelSchema";
 import { orderBy } from "lodash";
+import { usePanels } from "@/app/hooks/usePanels";
 
 const PanelsDialog: React.FC<DialogProps> = ({
     open,
@@ -26,22 +27,10 @@ const PanelsDialog: React.FC<DialogProps> = ({
     }
 
     const {
-        data:panels,
-        isLoading:panelsLoading,
-        refetch
-    }=useQuery({
-        queryKey:[ 'competition_panels',competitionId ],
-        queryFn:async()=>{
-            if(!competitionId){
-                return null
-            }
-            const result = await getPanels(String(competitionId));
-            if(result?.data){
-                return result.data;
-            }
-            return null;
-        }
-    })
+        panels,
+        panelsLoading,
+        refetchPanels:refetch
+    }=usePanels(String(competitionId))
 
     useEffect (() => {
         if(open){

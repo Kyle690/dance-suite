@@ -1,5 +1,12 @@
 import { z }from 'zod';
-import { CompetitiveType, SectionAgeGroup, SectionCategory, SectionEntryType, SectionLevel } from "@prisma/client";
+import {
+    CompetitiveType,
+    HeatStatus, HeatType,
+    SectionAgeGroup,
+    SectionCategory,
+    SectionEntryType,
+    SectionLevel
+} from "@prisma/client";
 
 export const SectionSchema = z.object({
     uid: z.string().uuid().optional(),
@@ -43,3 +50,27 @@ export const SectionDancersSchema = z.object({
 })
 
 export type SectionDancersSchemaType = z.infer<typeof SectionDancersSchema>;
+
+export const SectionHeatSchema = z.object({
+    section_id:z.string().min(8),
+    uid:z.string().optional(),
+    order:z.number(),
+    item_no:z.string().min(1),
+    status:z.enum(HeatStatus),
+    type:z.enum(HeatType),
+    callback_limit:z.number(),
+    dances:z.array(z.string()).min(1),
+    panel_id:z.string().min(8),
+}).superRefine((data,ctx)=>{
+    if(data.type!==HeatType.FINAL && data.type!==HeatType.UNCONTESTED){
+        if(!data.callback_limit || data.callback_limit<1){
+            ctx.addIssue({
+                path:[ 'callback_limit' ],
+                code:z.ZodIssueCode.custom,
+                message:'Callback limit must be at least 1 for non-final heats'
+            })
+        }
+    }
+})
+
+export type SectionHeatSchemaType = z.infer<typeof SectionHeatSchema>

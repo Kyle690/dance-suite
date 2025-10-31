@@ -49,10 +49,37 @@ export const getCompetitionSection = safeAction.inputSchema(SectionSchema.pick({
     })
 })
 
+export const getSectionHeats = safeAction.inputSchema(SectionSchema.pick({ uid:true })).action(async({ parsedInput })=>{
+    return prisma.heat.findMany({
+        where:{
+            section_id:String(parsedInput.uid)
+        },
+        orderBy:{
+            order:'asc'
+        },
+        include:{
+            panel:{
+                include:{
+                    panels_adjudicators:{
+                        include:{
+                            adjudicator:{
+                                select:{
+                                    letter:true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
+})
+
 export default{
     createSection,
     updateSection,
     deleteSection,
     getCompetitionSections,
-    getCompetitionSection
+    getCompetitionSection,
+    getSectionHeats
 }

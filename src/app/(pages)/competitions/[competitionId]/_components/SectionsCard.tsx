@@ -58,7 +58,7 @@ const SectionsCard: React.FC<SectionsCardProps> = () => {
             />
             <CardContent
                 sx={{
-                    height:800
+                    height:'800px'
                 }}
             >
                 <DataGrid
