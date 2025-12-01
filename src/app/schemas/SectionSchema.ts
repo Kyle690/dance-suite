@@ -74,3 +74,11 @@ export const SectionHeatSchema = z.object({
 })
 
 export type SectionHeatSchemaType = z.infer<typeof SectionHeatSchema>
+
+export const SectionHeatStartListSchema = z.object({
+    heat_id:z.string().min(8),
+    start_list:z.array(z.string().min(1)),
+    to_create:z.array(DancerSchema)
+})
+
+export type SectionHeatStartListSchemaType = z.infer<typeof SectionHeatStartListSchema>;

@@ -1,6 +1,8 @@
 import { safeAction } from "@/app/lib/safeAction";
-import { SectionHeatSchema } from "@/app/schemas/SectionSchema";
+import { SectionHeatSchema, SectionHeatStartListSchema } from "@/app/schemas/SectionSchema";
 import { prisma } from "@/app/lib/prisma";
+import { UidSchema } from "@/app/schemas/CommonSchema";
+import { HeatStatus } from "@prisma/client";
 
 
 export const createHeat = safeAction.inputSchema(SectionHeatSchema).action(async({ parsedInput, ctx })=>{
@@ -59,8 +61,61 @@ export const deleteHeat = safeAction.inputSchema(SectionHeatSchema.pick({ uid:tr
     })
 })
 
+export const activateHeat = safeAction.inputSchema(UidSchema).action(async({ parsedInput, ctx })=>{
+    return prisma.heat.update({
+        where:{
+            uid:parsedInput
+        },
+        data:{
+            status:HeatStatus.ACTIVE
+        }
+    })
+})
+
+
+export const getHeatDancers = safeAction.inputSchema(UidSchema).action(async({ parsedInput })=>{
+    return prisma.heat.findUnique({
+        where:{
+            uid:parsedInput
+        },
+        include:{
+            start_list:true,
+            section:{
+                include:{
+                    dancers:true
+                }
+            }
+        }
+    })
+})
+
+
+
+export const updateHeatDancers = safeAction.inputSchema(SectionHeatStartListSchema).action(async({ parsedInput })=>{
+
+    const connectDancers = await prisma.heat.update({
+        where:{
+            uid:parsedInput.heat_id
+        },
+        data:{
+            start_list:{
+                set:parsedInput.start_list.map((dancerId)=>({
+                    uid:dancerId
+                }))
+            }
+        }
+    })
+    // TODO - if dancers are part of a previous heat and have been removed they need to be adjusted accordingly
+
+    return connectDancers;
+
+})
+
 export default {
     createHeat,
     updateHeat,
     deleteHeat,
+    activateHeat,
+    getHeatDancers,
+    updateHeatDancers
 }

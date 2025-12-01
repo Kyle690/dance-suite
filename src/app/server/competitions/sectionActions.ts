@@ -58,6 +58,7 @@ export const getSectionHeats = safeAction.inputSchema(SectionSchema.pick({ uid:t
             order:'asc'
         },
         include:{
+            start_list:true,
             panel:{
                 include:{
                     panels_adjudicators:{

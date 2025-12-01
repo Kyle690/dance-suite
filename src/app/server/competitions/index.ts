@@ -4,7 +4,7 @@ import { updateAdjudicators, getAdjudicators } from "@/app/server/competitions/a
 import { createPanel, updatePanel, deletePanel, getPanels } from "@/app/server/competitions/panelActions";
 import { createSection, updateSection, deleteSection, getCompetitionSections, getCompetitionSection, getSectionHeats } from "@/app/server/competitions/sectionActions";
 import { createDancer, updateDancer, deleteDancer, getSectionDancers } from "@/app/server/competitions/dancerActions";
-import { createHeat, updateHeat, deleteHeat }from '@/app/server/competitions/heatActions'
+import { createHeat, updateHeat, deleteHeat, activateHeat, getHeatDancers, updateHeatDancers }from '@/app/server/competitions/heatActions'
 
 export {
     createCompetition,
@@ -29,5 +29,8 @@ export {
     getSectionHeats,
     createHeat,
     updateHeat,
-    deleteHeat
+    deleteHeat,
+    activateHeat,
+    getHeatDancers,
+    updateHeatDancers
 }

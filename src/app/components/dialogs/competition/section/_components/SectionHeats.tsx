@@ -58,6 +58,16 @@ const SectionHeats: React.FC<SectionHeatsProps> = ({
                         field:'callback_limit',
                         headerName:"Callback",
                         flex:1,
+                        headerAlign:'center',
+                        align:'center',
+                    },
+                    {
+                        field:'no_dancers',
+                        headerName:'No. of Dancers',
+                        flex:1,
+                        headerAlign:'center',
+                        align:'center',
+                        valueGetter:(_,row)=>row?.start_list?.length
                     },
                     {
                         field:'dances',

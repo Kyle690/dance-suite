@@ -8,11 +8,12 @@ import {
     FormatListBulletedAdd,
     ListSharp,
     ChecklistRtlSharp,
-    FilterListOffRounded
-}from '@mui/icons-material';
-import { deleteHeat } from "@/app/server/competitions";
+    FilterListOffRounded, PlayArrowSharp
+} from '@mui/icons-material';
+import { activateHeat, deleteHeat } from "@/app/server/competitions";
 import { useSnackbar } from "notistack";
 import HeatDialog from "@/app/components/dialogs/competition/section/HeatDialog";
+import HeatStartListDialog from "@/app/components/dialogs/competition/section/HeatStartListDialog";
 
 type SectionHeatRowButtonsProps = {
     data:any,
@@ -68,6 +69,24 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
                 icon:<ChecklistRtlSharp color={'success'}/>,
                 onClick:()=>{}
             },
+            {
+                label:'Enter Marks',
+                icon:<ListSharp color={'secondary'}/>,
+                onClick:()=>{}
+            },
+            {
+                label:'View Start List',
+                icon:<FormatListBulletedAdd color={'primary'}/>,
+                onClick:async()=>{
+                    const result =  await dialogs.open(HeatStartListDialog,{
+                        heatId:data?.uid
+                    })
+
+                    if(result){
+                        refetch()
+                    }
+                }
+            }
         ]
 
 
@@ -79,14 +98,38 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
             ]
         }
 
+        if(data?.status===HeatStatus.DRAFT){
+            return [
+                defaults[1],
+                defaults[0],
+                {
+                    label:'Activate',
+                    icon:<PlayArrowSharp color={'success'}/>,
+                    onClick:async()=>{
+                        await dialogs.confirm('Are you sure you want to activate this heat? Once activated the heat will be added to the upcoming schedule.',{
+                            title:'Please Confirm',
+                            onClose:async(res)=>{
+                                if(res){
+                                    await activateHeat(data?.uid);
+                                    refetch()
+                                }
+                            }
+                        })
+                    }
+                },
+                defaults[5]
+            ]
+        }
+
         if(
-            data?.status===HeatStatus.DRAFT
-            || data?.status===HeatStatus.READY
+            data?.status===HeatStatus.READY
             || data?.status===HeatStatus?.ACTIVE
         ){
             return [
                 defaults[1],
-                defaults[0]
+                defaults[0],
+                defaults[4],
+                defaults[5]
             ]
         }
 
@@ -94,11 +137,7 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
             return [
                 defaults[1],
                 defaults[2],
-                {
-                    label:'Start List',
-                    icon:<FormatListBulletedAdd color={'primary'}/>,
-                    color:'primary'
-                }
+                defaults[5]
             ]
         }
 
@@ -106,11 +145,8 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
             return [
                 defaults[1],
                 defaults[0],
-                {
-                    label:'Enter Marks',
-                    icon:<ListSharp color={'secondary'}/>,
-                    onClick:()=>{}
-                }
+                defaults[4],
+                defaults[5],
             ]
         }
 
@@ -120,7 +156,6 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
                 defaults[0],
                 defaults[2],
                 defaults[3]
-
             ]
         }
 
