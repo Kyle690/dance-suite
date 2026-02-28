@@ -1,6 +1,7 @@
 'use client';
 import React, { Suspense } from 'react';
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "@/app/theme";
 import { CssBaseline, LinearProgress } from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -14,11 +15,6 @@ const queryClient = new QueryClient({
 
 })
 
-const theme = createTheme({
-    cssVariables: {
-        colorSchemeSelector: 'data-toolpad-color-scheme',
-    },
-});
 const App: React.FC<AppProps> = ({
     children
 }) => {

@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { AppProvider } from "@toolpad/core/AppProvider";
-import { createTheme } from "@mui/material/styles";
+import theme from "@/app/theme";
 import { Home, Event, Dashboard, ExitToAppOutlined, Settings } from '@mui/icons-material';
 import { DashboardLayout } from "@toolpad/core";
 import { IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
@@ -10,7 +10,6 @@ import { useParams, useRouter } from "next/navigation";
 import { getCompetition } from "@/app/server/competitions";
 import CustomToolbarAction from "@/app/components/layout/CustomToolbarAction";
 import CustomAppTitle from "@/app/components/layout/CustomAppTitle";
-
 
 type layoutProps = {
     children: React.ReactNode
@@ -41,13 +40,6 @@ const NAVIGATION = [
 const BRANDING = {
     title: 'Dance Suite Scrutineer',
 };
-
-const theme = createTheme({
-    cssVariables: {
-        colorSchemeSelector: 'data-toolpad-color-scheme',
-    },
-});
-
 
 const Layout: React.FC<layoutProps> = ({
     children
@@ -90,10 +82,15 @@ const Layout: React.FC<layoutProps> = ({
             >
                 <Stack
                     p={4}
+                    sx={{
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        background:'background.paper',
+                    }}
                 >
                     {children}
                 </Stack>
-
             </DashboardLayout>
         </AppProvider>
     );

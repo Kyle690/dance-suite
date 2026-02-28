@@ -10,6 +10,7 @@ import { useParams } from "next/navigation";
 import { deleteSection, getCompetitionSections } from "@/app/server/competitions";
 import { DataGrid } from "@mui/x-data-grid";
 import SectionDialog from "@/app/components/dialogs/competition/section/SectionDialog";
+import { startCase, toLower } from "lodash";
 
 
 type SectionsCardProps = {}
@@ -39,26 +40,22 @@ const SectionsCard: React.FC<SectionsCardProps> = () => {
     })
 
     return (
-        <Card>
-            <CardHeader
-                action={(
-                    <Button
-                        size={'small'}
-                        variant={'contained'}
-                        color={'primary'}
-                        startIcon={<AddCircle color={'inherit'} />}
-                        onClick={async()=>{
-                            await dialogs.open(SectionDetailsDialog)
-                            refetch();
-                        }}
-                    >
-                        Add Section
-                    </Button>
-                )}
-            />
+        <Card
+            sx={{
+                borderTopLeftRadius: 0,
+                flex: 1,
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+            }}
+        >
             <CardContent
                 sx={{
-                    height:'800px'
+                    flex: 1,
+                    minHeight: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    pb: '16px !important',
                 }}
             >
                 <DataGrid
@@ -74,7 +71,7 @@ const SectionsCard: React.FC<SectionsCardProps> = () => {
                                             await dialogs.open(SectionDialog, params.row)
                                         }}
                                     >
-                                        {params.value}
+                                        {startCase(toLower(params.value))}
                                     </Button>
                                 )
                             }
@@ -158,6 +155,7 @@ const SectionsCard: React.FC<SectionsCardProps> = () => {
                     showToolbar
                     loading={isLoading}
                     sx={{
+                        flex: 1,
                         backgroundColor:'background.paper',
                         borderRadius:4,
                         '& .MuiDataGrid-columnHeader': {
@@ -182,3 +180,5 @@ const SectionsCard: React.FC<SectionsCardProps> = () => {
 }
 
 export default SectionsCard;
+
+//RL5i1MLnSzyc

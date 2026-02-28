@@ -15,7 +15,7 @@ import { DialogProps } from "@toolpad/core";
 import { useParams } from "next/navigation";
 import CustomInput from "@/app/components/forms/CustomInput";
 import { startCase, toLower, values } from "lodash";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createSection, updateSection } from "@/app/server/competitions";
 import { useSnackbar } from "notistack";
 
@@ -60,6 +60,7 @@ const SectionDetailsDialog: React.FC<DialogProps<SectionDialogProps>> = ({
     }, [ payload, open ]);
 
     const { enqueueSnackbar }=useSnackbar()
+    const queryClient = useQueryClient();
 
     const {
         mutate,
@@ -72,6 +73,9 @@ const SectionDetailsDialog: React.FC<DialogProps<SectionDialogProps>> = ({
         onSuccess:(data)=>{
             if(data.data){
                 enqueueSnackbar('Section saved successfully',{ variant:'success' })
+                queryClient.invalidateQueries({
+                    queryKey:[ 'competitionSections', competitionId ]
+                })
                 onExit();
                 return;
             }

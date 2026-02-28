@@ -100,10 +100,11 @@ const SectionHeats: React.FC<SectionHeatsProps> = ({
 
                             return (
                                 <Chip
+                                    size={'small'}
                                     label={startCase(toLower(params?.row?.status))}
                                     sx={{
-                                        backgroundColor:getHeatStatusColor(params.row.status),
-                                        color:darken(getHeatStatusColor(params.row.status), 0.8)
+                                        backgroundColor:lighten(getHeatStatusColor(params.row.status), 0.7),
+                                        color:darken(getHeatStatusColor(params.row.status), 0.1),
                                     }}
                                 />
                             )

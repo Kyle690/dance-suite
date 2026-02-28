@@ -1,9 +1,9 @@
 import React from 'react';
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { getAdjudicators, getCompetition } from "@/app/server/competitions";
-import { IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
-import { Settings, ExitToAppOutlined, Edit, Delete, People, FormatListNumberedRtl } from '@mui/icons-material'
+import { getCompetition } from "@/app/server/competitions";
+import { IconButton, Stack, Tooltip } from "@mui/material";
+import { ExitToAppOutlined, Edit, Delete, People, FormatListNumberedRtl, DarkMode, LightMode } from '@mui/icons-material'
 import MenuButtons from "@/app/components/layout/MenuButtons";
 import { competition } from "@prisma/client";
 import { useDialogs } from "@toolpad/core";
@@ -11,6 +11,7 @@ import CompetitionDetailsDialog from "@/app/components/dialogs/competition/Compe
 import AdjudicatorsDialog from "@/app/components/dialogs/competition/AdjudicatorsDialog";
 import PanelsDialog from "@/app/components/dialogs/competition/PanelsDialog";
 import { useAdjudicators } from "@/app/hooks/useAdjudicators";
+import { useColorScheme } from "@mui/material/styles";
 
 type CustomToolbarActionProps = {
     competition?:competition
@@ -22,6 +23,8 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
 
     const router = useRouter()
     const dialogs = useDialogs();
+    const { mode, setMode } = useColorScheme();
+    const isDark = mode === 'dark';
 
     const {
         data:adjudicators,
@@ -80,6 +83,11 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                 ]}
 
             />
+            <Tooltip title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}>
+                <IconButton onClick={() => setMode(isDark ? 'light' : 'dark')}>
+                    {isDark ? <LightMode /> : <DarkMode />}
+                </IconButton>
+            </Tooltip>
             <Tooltip title={'Close Competition'}>
                 <IconButton
                     onClick={()=>router.push('/competitions')}
