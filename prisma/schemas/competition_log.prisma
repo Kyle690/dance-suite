@@ -1,0 +1,68 @@
+enum CompetitionLogEventType {
+  COMPETITION_CREATED
+  COMPETITION_STARTED
+  COMPETITION_COMPLETED
+  COMPETITION_ARCHIVED
+
+  SECTION_CREATED
+  SECTION_EDITED
+  SECTION_DELETED
+
+  // DANCER ACTIONS
+  DANCER_REGISTERED
+  DANCER_ADDED
+  DANCER_EDITED
+  DANCER_WITHDRAWN
+
+  HEAT_CREATED
+  HEAT_EDITED
+  HEAT_DELETED
+
+  // HEAT ACTIONS
+  HEAT_ACTIVE // heat ready for marshalling
+  HEAT_MARSHALLING // marshalling in progress, collecting all dancers
+  HEAT_READY // marshalling complete, heat ready to start
+  HEAT_JUDGING // heat in progress
+  HEAT_REVIEWING // heat complete, results being reviewed by scrutineer
+  HEAT_CHECKING // results reviewed by chairperson, ready for final check
+  HEAT_COMPLETE // heat complete, results final
+  HEAT_CANCELED // heat canceled
+
+  HEAT_MARKS_ENTERED // Scrutineer has entered marks
+  HEAT_MARKS_SUBMITTED // Judge Has Entered the marks
+
+  COMPETITION_USER_CREATED
+  COMPETITION_USER_EDITED
+  COMPETITION_USER_DELETED
+
+  PANEL_CREATED
+  PANEL_EDITED
+  PANEL_DELETED
+
+  COMPETITION_NOTE_ADDED
+  COMPETITION_NOTE_EDITED
+  COMPETITION_NOTE_DELETED
+
+  SYSTEM_EVENT
+}
+
+model competition_log {
+  uid            String                  @id @unique @default(uuid()) @db.Uuid
+  created        DateTime                @default(now())
+  updated        DateTime                @updatedAt
+  competition_id String                  @db.Uuid
+  competition    competition             @relation(fields: [competition_id], references: [uid], onDelete: Cascade)
+  user_id        String?                 @db.Uuid
+  user           competition_users?      @relation(fields: [user_id], references: [uid])
+  event_type     CompetitionLogEventType
+  note           String?
+  data           Json?
+  heat_id        String?                 @db.Uuid
+  heat           heat?                   @relation(fields: [heat_id], references: [uid])
+  dancer_id      String?                 @db.Uuid
+  dancer         dancers?                @relation(fields: [dancer_id], references: [uid])
+  panel_id       String?                 @db.Uuid
+  panel          panels?                 @relation(fields: [panel_id], references: [uid])
+  section_id     String?                 @db.Uuid
+  section        sections?               @relation(fields: [section_id], references: [uid])
+}

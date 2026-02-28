@@ -4,15 +4,17 @@ enum HeatMarkInputType {
 }
 
 model heat_marks {
-  uid            String            @id @unique @default(uuid()) @db.Uuid
-  created        DateTime          @default(now())
-  updated        DateTime          @updatedAt
-  heat_id        String            @db.Uuid
-  heat           heat              @relation(fields: [heat_id], references: [uid], onDelete: Cascade)
-  adjudicator_id String            @db.Uuid
-  adjudicator    adjudicator       @relation(fields: [adjudicator_id], references: [uid])
+  uid            String             @id @unique @default(uuid()) @db.Uuid
+  created        DateTime           @default(now())
+  updated        DateTime           @updatedAt
+  heat_id        String             @db.Uuid
+  heat           heat               @relation(fields: [heat_id], references: [uid], onDelete: Cascade)
+  adjudicator_id String             @db.Uuid
+  adjudicator    adjudicator        @relation(fields: [adjudicator_id], references: [uid])
   ip_address     String?
   signature      String?
   check_sum      String?
-  input_type     HeatMarkInputType @default(JUDGE)
+  input_type     HeatMarkInputType  @default(JUDGE)
+  scrutineer_id  String?            @db.Uuid
+  scrutineer     competition_users? @relation(fields: [scrutineer_id], references: [uid])
 }

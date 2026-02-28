@@ -37,6 +37,24 @@ export const getCompetitionSections = safeAction.inputSchema(SectionSchema.pick(
     return prisma.sections.findMany({
         where:{
             competition_id:parsedInput.competition_id,
+        },
+        include:{
+            heat:{
+                where:{
+                    status:{
+                        in:[
+                            'DRAFT',
+                            'ACTIVE'
+                        ]
+                    }
+                },
+                take:1,
+            },
+            _count:{
+                select:{
+                    heat:true,
+                }
+            }
         }
     })
 })
@@ -59,6 +77,12 @@ export const getSectionHeats = safeAction.inputSchema(SectionSchema.pick({ uid:t
         },
         include:{
             start_list:true,
+            section:{
+                select:{
+                    name:true
+                }
+            },
+            heat_marks:true,
             panel:{
                 include:{
                     panels_adjudicators:{

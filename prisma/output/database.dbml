@@ -81,6 +81,7 @@ Table heat_marks {
   signature String
   check_sum String
   input_type HeatMarkInputType [not null, default: 'JUDGE']
+  scrutineer_id String
 }
 
 Table adjudicator {
@@ -154,6 +155,21 @@ Table heat {
   checked_at DateTime
 }
 
+Table competition_log {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  competition_id String [not null]
+  user_id String
+  event_type CompetitionLogEventType [not null]
+  note String
+  data Json
+  heat_id String
+  dancer_id String
+  panel_id String
+  section_id String
+}
+
 Table competition {
   uid String [pk]
   created DateTime [default: `now()`, not null]
@@ -178,6 +194,9 @@ Table competition_users {
   competition_id String [not null]
   user_id String [not null]
   role CompetitionUserRole [not null, default: 'VIEWER']
+  is_deleted Boolean [not null, default: false]
+  deleted_at DateTime
+  is_active Boolean [not null, default: true]
 }
 
 Table competition_notes {
@@ -286,6 +305,43 @@ Enum HeatStatus {
   CANCELED
 }
 
+Enum CompetitionLogEventType {
+  COMPETITION_CREATED
+  COMPETITION_STARTED
+  COMPETITION_COMPLETED
+  COMPETITION_ARCHIVED
+  SECTION_CREATED
+  SECTION_EDITED
+  SECTION_DELETED
+  DANCER_REGISTERED
+  DANCER_ADDED
+  DANCER_EDITED
+  DANCER_WITHDRAWN
+  HEAT_CREATED
+  HEAT_EDITED
+  HEAT_DELETED
+  HEAT_ACTIVE
+  HEAT_MARSHALLING
+  HEAT_READY
+  HEAT_JUDGING
+  HEAT_REVIEWING
+  HEAT_CHECKING
+  HEAT_COMPLETE
+  HEAT_CANCELED
+  HEAT_MARKS_ENTERED
+  HEAT_MARKS_SUBMITTED
+  COMPETITION_USER_CREATED
+  COMPETITION_USER_EDITED
+  COMPETITION_USER_DELETED
+  PANEL_CREATED
+  PANEL_EDITED
+  PANEL_DELETED
+  COMPETITION_NOTE_ADDED
+  COMPETITION_NOTE_EDITED
+  COMPETITION_NOTE_DELETED
+  SYSTEM_EVENT
+}
+
 Enum CompetitionStatus {
   DRAFT
   ACTIVE
@@ -334,6 +390,8 @@ Ref: heat_marks.heat_id > heat.uid [delete: Cascade]
 
 Ref: heat_marks.adjudicator_id > adjudicator.uid
 
+Ref: heat_marks.scrutineer_id > competition_users.uid
+
 Ref: adjudicator.competition_id > competition.uid
 
 Ref: marks.dancer_id > dancers.uid [delete: Cascade]
@@ -351,6 +409,18 @@ Ref: heat.schedule_id > competition_schedule.uid
 Ref: heat.reviewed_by_id > competition_users.uid
 
 Ref: heat.checked_by_id > competition_users.uid
+
+Ref: competition_log.competition_id > competition.uid [delete: Cascade]
+
+Ref: competition_log.user_id > competition_users.uid
+
+Ref: competition_log.heat_id > heat.uid
+
+Ref: competition_log.dancer_id > dancers.uid
+
+Ref: competition_log.panel_id > panels.uid
+
+Ref: competition_log.section_id > sections.uid
 
 Ref: competition_users.competition_id > competition.uid
 

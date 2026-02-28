@@ -124,7 +124,7 @@ const SectionDialog: React.FC<DialogProps<sections>> = ({
             </DialogTitle>
             <DialogContent
                 sx={{
-                    height:700
+                    minHeight:800
                 }}
             >
                 {isLoading ? (

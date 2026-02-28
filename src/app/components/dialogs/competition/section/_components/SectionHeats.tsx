@@ -83,6 +83,14 @@ const SectionHeats: React.FC<SectionHeatsProps> = ({
                         }
                     },
                     {
+                        field:'marks_entered',
+                        headerName:'Marks Entered',
+                        flex:1,
+                        headerAlign:'center',
+                        align:'center',
+                        valueGetter:(_,row)=>`${row?.heat_marks?.length || 0} / ${row?.panel?.panels_adjudicators?.length || 0}`
+                    },
+                    {
                         field:'status',
                         headerName:'Status',
                         flex:1,

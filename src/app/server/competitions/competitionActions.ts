@@ -1,5 +1,5 @@
 import { safeAction } from "@/app/lib/safeAction";
-import { CompetitionDetailsFormSchema } from "@/app/schemas/CompetitionDetailsForm";
+import { CompetitionDetailsFormSchema, CompetitionUserRequestSchema } from "@/app/schemas/CompetitionDetailsForm";
 import { prisma } from "@/app/lib/prisma";
 import dayjs from "@/app/utils/dayjs";
 import { CompetitionUserRole } from "@prisma/client";
@@ -79,9 +79,18 @@ export const updateCompetition = safeAction.inputSchema(CompetitionDetailsFormSc
 
 })
 
+export const getCompetitionUser = safeAction.inputSchema(CompetitionUserRequestSchema).action(async({ parsedInput })=>{
+    return prisma.competition_users.findFirst({
+        where:{
+            competition_id:parsedInput.competitionId,
+            user_id:parsedInput.userId,
+        }
+    })
+})
 export default {
     createCompetition,
     getCompetitions,
     getCompetition,
     updateCompetition,
+    getCompetitionUser
 }

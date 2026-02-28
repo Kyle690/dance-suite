@@ -67,16 +67,33 @@ const SectionsCard: React.FC<SectionsCardProps> = () => {
                             field:'name',
                             headerName:'Section Name',
                             flex:1,
+                            renderCell:(params)=>{
+                                return (
+                                    <Button
+                                        onClick={async()=>{
+                                            await dialogs.open(SectionDialog, params.row)
+                                        }}
+                                    >
+                                        {params.value}
+                                    </Button>
+                                )
+                            }
                         },
                         {
-                            field:'heats',
+                            field:'_count.heat',
                             headerName:'Heats',
-                            flex:1
+                            flex:1,
+                            valueGetter:(_,row)=>row._count?.heat || 0,
+                            align:'center',
+                            headerAlign:'center'
                         },
                         {
                             field:'next_heat',
                             headerName:'Next Heat',
-                            flex:1
+                            flex:1,
+                            valueGetter:(_, row)=>`Item ${row?.heat?.[0]?.item_no || 0}`,
+                            align:'center',
+                            headerAlign:'center'
                         },
                         {
                             field:'entry_type',

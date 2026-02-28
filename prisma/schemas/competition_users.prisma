@@ -14,6 +14,9 @@ model competition_users {
   competition    competition         @relation(fields: [competition_id], references: [uid])
   user_id        String              @db.Uuid // Clerk Uid
   role           CompetitionUserRole @default(VIEWER)
+  is_deleted     Boolean             @default(false)
+  deleted_at     DateTime?
+  is_active      Boolean             @default(true)
 
   // relationships
   heat_reviewed_by  heat[]    @relation("competition_user_heat_reviewed_by")

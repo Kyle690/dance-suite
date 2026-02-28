@@ -82,3 +82,13 @@ export const SectionHeatStartListSchema = z.object({
 })
 
 export type SectionHeatStartListSchemaType = z.infer<typeof SectionHeatStartListSchema>;
+
+
+export const SectionHeatRoundResultSchema = z.object({
+    heat_id:z.string().min(8),
+    results:z.array(z.object({
+        dancer_id:z.string().min(8),
+        callbacks:z.number().min(0),
+        called_back:z.boolean()
+    })),
+})

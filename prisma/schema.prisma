@@ -43,6 +43,7 @@ model panels {
   deleted_by_id       String?               @db.Uuid
   panels_adjudicators panels_adjudicators[]
   heat                heat[]
+  competition_log     competition_log[]
 }
 
 model panels_adjudicators {
@@ -102,17 +103,19 @@ enum HeatMarkInputType {
 }
 
 model heat_marks {
-  uid            String            @id @unique @default(uuid()) @db.Uuid
-  created        DateTime          @default(now())
-  updated        DateTime          @updatedAt
-  heat_id        String            @db.Uuid
-  heat           heat              @relation(fields: [heat_id], references: [uid], onDelete: Cascade)
-  adjudicator_id String            @db.Uuid
-  adjudicator    adjudicator       @relation(fields: [adjudicator_id], references: [uid])
+  uid            String             @id @unique @default(uuid()) @db.Uuid
+  created        DateTime           @default(now())
+  updated        DateTime           @updatedAt
+  heat_id        String             @db.Uuid
+  heat           heat               @relation(fields: [heat_id], references: [uid], onDelete: Cascade)
+  adjudicator_id String             @db.Uuid
+  adjudicator    adjudicator        @relation(fields: [adjudicator_id], references: [uid])
   ip_address     String?
   signature      String?
   check_sum      String?
-  input_type     HeatMarkInputType @default(JUDGE)
+  input_type     HeatMarkInputType  @default(JUDGE)
+  scrutineer_id  String?            @db.Uuid
+  scrutineer     competition_users? @relation(fields: [scrutineer_id], references: [uid])
   marks          marks[]
 }
 
@@ -227,6 +230,7 @@ model sections {
   section_result   section_result[]
   heat_result      heat_result[]
   heat             heat[]
+  competition_log  competition_log[]
   dancers          dancers[]
 }
 
@@ -251,30 +255,100 @@ enum HeatStatus {
 }
 
 model heat {
-  uid            String                @id @unique @default(uuid()) @db.Uuid
-  created        DateTime              @default(now())
-  updated        DateTime              @updatedAt
-  section_id     String                @db.Uuid
-  section        sections              @relation(fields: [section_id], references: [uid], onDelete: Cascade)
-  order          Int?
-  item_no        String
-  status         HeatStatus            @default(DRAFT)
-  type           HeatType              @default(ROUND)
-  callback_limit Int?
-  dances         String[]
-  start_list     dancers[]
-  panel_id       String?               @db.Uuid
-  panel          panels?               @relation(fields: [panel_id], references: [uid])
-  schedule_id    String?               @db.Uuid
-  schedule       competition_schedule? @relation(fields: [schedule_id], references: [uid])
-  reviewed_by_id String?               @db.Uuid
-  reviewed_by    competition_users?    @relation("competition_user_heat_reviewed_by", fields: [reviewed_by_id], references: [uid])
-  reviewed_at    DateTime?
-  checked_by_id  String?               @db.Uuid
-  checked_by     competition_users?    @relation("competition_user_heat_checked_by", fields: [checked_by_id], references: [uid])
-  checked_at     DateTime?
-  heat_result    heat_result[]
-  heat_marks     heat_marks[]
+  uid             String                @id @unique @default(uuid()) @db.Uuid
+  created         DateTime              @default(now())
+  updated         DateTime              @updatedAt
+  section_id      String                @db.Uuid
+  section         sections              @relation(fields: [section_id], references: [uid], onDelete: Cascade)
+  order           Int?
+  item_no         String
+  status          HeatStatus            @default(DRAFT)
+  type            HeatType              @default(ROUND)
+  callback_limit  Int?
+  dances          String[]
+  start_list      dancers[]
+  panel_id        String?               @db.Uuid
+  panel           panels?               @relation(fields: [panel_id], references: [uid])
+  schedule_id     String?               @db.Uuid
+  schedule        competition_schedule? @relation(fields: [schedule_id], references: [uid])
+  reviewed_by_id  String?               @db.Uuid
+  reviewed_by     competition_users?    @relation("competition_user_heat_reviewed_by", fields: [reviewed_by_id], references: [uid])
+  reviewed_at     DateTime?
+  checked_by_id   String?               @db.Uuid
+  checked_by      competition_users?    @relation("competition_user_heat_checked_by", fields: [checked_by_id], references: [uid])
+  checked_at      DateTime?
+  heat_result     heat_result[]
+  heat_marks      heat_marks[]
+  competition_log competition_log[]
+}
+
+enum CompetitionLogEventType {
+  COMPETITION_CREATED
+  COMPETITION_STARTED
+  COMPETITION_COMPLETED
+  COMPETITION_ARCHIVED
+
+  SECTION_CREATED
+  SECTION_EDITED
+  SECTION_DELETED
+
+  // DANCER ACTIONS
+  DANCER_REGISTERED
+  DANCER_ADDED
+  DANCER_EDITED
+  DANCER_WITHDRAWN
+
+  HEAT_CREATED
+  HEAT_EDITED
+  HEAT_DELETED
+
+  // HEAT ACTIONS
+  HEAT_ACTIVE // heat ready for marshalling
+  HEAT_MARSHALLING // marshalling in progress, collecting all dancers
+  HEAT_READY // marshalling complete, heat ready to start
+  HEAT_JUDGING // heat in progress
+  HEAT_REVIEWING // heat complete, results being reviewed by scrutineer
+  HEAT_CHECKING // results reviewed by chairperson, ready for final check
+  HEAT_COMPLETE // heat complete, results final
+  HEAT_CANCELED // heat canceled
+
+  HEAT_MARKS_ENTERED // Scrutineer has entered marks
+  HEAT_MARKS_SUBMITTED // Judge Has Entered the marks
+
+  COMPETITION_USER_CREATED
+  COMPETITION_USER_EDITED
+  COMPETITION_USER_DELETED
+
+  PANEL_CREATED
+  PANEL_EDITED
+  PANEL_DELETED
+
+  COMPETITION_NOTE_ADDED
+  COMPETITION_NOTE_EDITED
+  COMPETITION_NOTE_DELETED
+
+  SYSTEM_EVENT
+}
+
+model competition_log {
+  uid            String                  @id @unique @default(uuid()) @db.Uuid
+  created        DateTime                @default(now())
+  updated        DateTime                @updatedAt
+  competition_id String                  @db.Uuid
+  competition    competition             @relation(fields: [competition_id], references: [uid], onDelete: Cascade)
+  user_id        String?                 @db.Uuid
+  user           competition_users?      @relation(fields: [user_id], references: [uid])
+  event_type     CompetitionLogEventType
+  note           String?
+  data           Json?
+  heat_id        String?                 @db.Uuid
+  heat           heat?                   @relation(fields: [heat_id], references: [uid])
+  dancer_id      String?                 @db.Uuid
+  dancer         dancers?                @relation(fields: [dancer_id], references: [uid])
+  panel_id       String?                 @db.Uuid
+  panel          panels?                 @relation(fields: [panel_id], references: [uid])
+  section_id     String?                 @db.Uuid
+  section        sections?               @relation(fields: [section_id], references: [uid])
 }
 
 enum CompetitionStatus {
@@ -304,6 +378,7 @@ model competition {
   panels               panels[]
   adjudicator          adjudicator[]
   sections             sections[]
+  competition_log      competition_log[]
   competition_users    competition_users[]
   competition_notes    competition_notes[]
 }
@@ -324,14 +399,19 @@ model competition_users {
   competition    competition         @relation(fields: [competition_id], references: [uid])
   user_id        String              @db.Uuid // Clerk Uid
   role           CompetitionUserRole @default(VIEWER)
+  is_deleted     Boolean             @default(false)
+  deleted_at     DateTime?
+  is_active      Boolean             @default(true)
 
   // relationships
-  heat_reviewed_by  heat[]        @relation("competition_user_heat_reviewed_by")
-  heat_checked_by   heat[]        @relation("competition_user_heat_checked_by")
-  dancer_created_by dancers[]     @relation("dancer_created_by")
-  dancer_updated_by dancers[]     @relation("dancer_updated_by")
-  dancer_deleted_by dancers[]     @relation("dancer_deleted_by")
+  heat_reviewed_by  heat[]            @relation("competition_user_heat_reviewed_by")
+  heat_checked_by   heat[]            @relation("competition_user_heat_checked_by")
+  dancer_created_by dancers[]         @relation("dancer_created_by")
+  dancer_updated_by dancers[]         @relation("dancer_updated_by")
+  dancer_deleted_by dancers[]         @relation("dancer_deleted_by")
   heat_result       heat_result[]
+  heat_marks        heat_marks[]
+  competition_log   competition_log[]
 }
 
 model competition_notes {
@@ -376,4 +456,5 @@ model dancers {
   marks              marks[]
   heat               heat?                @relation(fields: [heatUid], references: [uid])
   heatUid            String?              @db.Uuid
+  competition_log    competition_log[]
 }

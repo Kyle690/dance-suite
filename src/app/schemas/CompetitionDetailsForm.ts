@@ -12,3 +12,9 @@ export const CompetitionDetailsFormSchema = z.object({
 })
 
 export type CompetitionDetailsFormType = z.infer<typeof CompetitionDetailsFormSchema>;
+
+
+export const CompetitionUserRequestSchema = z.object({
+    competitionId:z.string(),
+    userId:z.string().min(8)
+})

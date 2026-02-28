@@ -77,7 +77,7 @@ const CompetitionDetailsDialog: React.FC<DialogProps<CompetitionDetailsProps>> =
         isPending
     }=useMutation({
         mutationFn:async(data:CompetitionDetailsFormType)=>payload? updateCompetition(data):createCompetition(data),
-        mutationKey:[ 'createCompetition', payload ],
+        mutationKey:[ 'create-competition', payload ],
         onSuccess:(data)=>{
             if(data.data){
                 enqueueSnackbar(`Competition ${payload?'update':'created'} successfully`, { variant:'success' })

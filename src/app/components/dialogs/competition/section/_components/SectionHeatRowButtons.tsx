@@ -1,19 +1,23 @@
 import React, { useMemo } from 'react';
 import MenuButtons, { MenuButtonsProps } from "@/app/components/layout/MenuButtons";
-import { HeatStatus } from "@prisma/client";
+import { HeatStatus, HeatType } from "@prisma/client";
 import { useDialogs } from "@toolpad/core";
 import {
     Delete,
     Edit,
     FormatListBulletedAdd,
-    ListSharp,
     ChecklistRtlSharp,
-    FilterListOffRounded, PlayArrowSharp
+    FilterListOffRounded,
+    PlayArrowSharp,
+    ChecklistSharp, ListAlt,
 } from '@mui/icons-material';
 import { activateHeat, deleteHeat } from "@/app/server/competitions";
 import { useSnackbar } from "notistack";
 import HeatDialog from "@/app/components/dialogs/competition/section/HeatDialog";
 import HeatStartListDialog from "@/app/components/dialogs/competition/section/HeatStartListDialog";
+import HeatMarksRoundDialog from "@/app/components/dialogs/competition/section/HeatMarksRoundDialog";
+import HeatRoundReviewDialog from "@/app/components/dialogs/competition/section/HeatRoundReviewDialog";
+import HeatRoundResultDialog from "@/app/components/dialogs/competition/section/HeatRoundResultDialog";
 
 type SectionHeatRowButtonsProps = {
     data:any,
@@ -27,7 +31,6 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
 
     const dialogs = useDialogs()
     const { enqueueSnackbar }=useSnackbar()
-
 
 
     const buttons:MenuButtonsProps['buttons'] = useMemo(()=>{
@@ -67,12 +70,28 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
             {
                 label:'Review Marks',
                 icon:<ChecklistRtlSharp color={'success'}/>,
-                onClick:()=>{}
+                onClick:async()=>{
+                    if(data?.type===HeatType.ROUND || data?.type===HeatType.QUARTER_FINAL || data?.type===HeatType.SEMI_FINAL) {
+                        const response = await dialogs.open (HeatRoundReviewDialog, {
+                            heat_id:data?.uid
+                        })
+
+                        if(response){
+                            refetch()
+                        }
+                    }
+                }
             },
             {
                 label:'Enter Marks',
-                icon:<ListSharp color={'secondary'}/>,
-                onClick:()=>{}
+                icon:<ChecklistSharp color={'secondary'}/>,
+                onClick:async()=>{
+                    if(data?.type===HeatType.ROUND || data?.type===HeatType.QUARTER_FINAL || data?.type===HeatType.SEMI_FINAL){
+                        await dialogs.open(HeatMarksRoundDialog,{
+                            ...data
+                        })
+                    }
+                }
             },
             {
                 label:'View Start List',
@@ -86,7 +105,16 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
                         refetch()
                     }
                 }
-            }
+            },
+            {
+                label:'Review Result',
+                icon:<ListAlt color={'info'}/>,
+                onClick:async()=>{
+                    await dialogs.open(HeatRoundResultDialog, {
+                        heatId:String(data?.uid)
+                    })
+                },
+            },
         ]
 
 
@@ -94,7 +122,7 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
             return [
                 defaults[0],
                 defaults[2],
-                defaults[3]
+                defaults[6]
             ]
         }
 
@@ -159,11 +187,30 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
             ]
         }
 
+        if(data?.status===HeatStatus.CHECKING){
+            return [
+                {
+                    label:'Review Result',
+                    icon:<ListAlt color={'info'}/>,
+                    onClick:async()=>{
+                        await dialogs.open(HeatRoundResultDialog, {
+                            heatId:String(data?.uid)
+                        })
+                    },
+                },
+                {
+                    label:'Delete Marks',
+                    icon:<Delete color={'error'}/>,
+                    onClick:async()=>{},
+                }
+            ]
+        }
+
 
         return []
     },[ dialogs, data ])
 
-    const disabled = data?.status === HeatStatus.COMPLETE || data?.status === HeatStatus.CANCELED
+    const disabled =  data?.status === HeatStatus.CANCELED
 
 
     return (
