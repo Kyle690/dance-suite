@@ -232,6 +232,8 @@ const WorkingPage = ({ data }: { data: PageData }) => {
         >
             <PageHeader data={data} />
 
+            <Text style={styles.sectionTitle}>Finals Working — Rules 9, 10 &amp; 11</Text>
+
             {/* Panel strip */}
             {adjudicators.length > 0 && (
                 <View style={styles.panelRow}>
@@ -333,14 +335,11 @@ const WorkingPage = ({ data }: { data: PageData }) => {
                         style={[ styles.tableRow, ri % 2 === 0 ? styles.tableRowEven : {} ]}
                     >
                         <Text style={[ styles.cell, { width: NO_W } ]}>{dancer.dancer_number}</Text>
-                        {danceNames.map((dance, i) => {
-                            const place = dancer.perDancePlaces.find(p => p.dance === dance)?.place ?? 0;
-                            return (
-                                <Text key={i} style={[ styles.cell, { width: DANCE_W } ]}>
-                                    {place > 0 ? String(place) : ''}
-                                </Text>
-                            );
-                        })}
+                        {dancer.perDancePlaces.map((dp) => (
+                            <Text key={dp.dance} style={[ styles.cell, { width: DANCE_W } ]}>
+                                {dp.place > 0 ? String(dp.place) : ''}
+                            </Text>
+                        ))}
                         <Text style={[ styles.cell, styles.cellBold, { width: TOTAL_W } ]}>{dancer.total}</Text>
                         <Text style={[ styles.cell, { width: PLACE_W } ]}>{dancer.place}</Text>
                         <Text style={[ styles.cell, styles.cellLast, { width: RULE_W } ]}>{dancer.rule}</Text>
@@ -381,14 +380,11 @@ const WorkingPage = ({ data }: { data: PageData }) => {
                                     >
                                         <Text style={[ styles.cell, { width: NO_W } ]}>{dancer.dancer_number}</Text>
                                         <Text style={[ styles.cell, styles.cellLeft, { width: NAME_W } ]}>{name}</Text>
-                                        {danceNames.map((dance, i) => {
-                                            const place = dancer.perDancePlaces.find(p => p.dance === dance)?.place ?? 0;
-                                            return (
-                                                <Text key={i} style={[ styles.cell, { width: DANCE_W } ]}>
-                                                    {place > 0 ? String(place) : ''}
-                                                </Text>
-                                            );
-                                        })}
+                                        {dancer.perDancePlaces.map((dp) => (
+                                            <Text key={dp.dance} style={[ styles.cell, { width: DANCE_W } ]}>
+                                                {dp.place > 0 ? String(dp.place) : ''}
+                                            </Text>
+                                        ))}
                                         <Text style={[ styles.cell, styles.cellBold, { width: TOTAL_W } ]}>{dancer.total}</Text>
                                         <Text style={[ styles.cell, styles.cellLast, { width: PLACE_W } ]}>{dancer.place}</Text>
                                     </View>
