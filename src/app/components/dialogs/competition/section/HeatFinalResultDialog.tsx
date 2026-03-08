@@ -5,6 +5,7 @@ import {
     Box,
     Button,
     ButtonGroup,
+    Chip,
     CircularProgress,
     ClickAwayListener,
     Dialog,
@@ -235,10 +236,10 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
                     alignItems="center"
                 >
                     <Typography variant="h6">
-                        {data?.item_no} — Finals Result
+                        {data?.item_no ?? ''} — Finals Result
                     </Typography>
                     <Typography variant="h6">
-                        {startCase(toLower(String(data?.section?.name)))}
+                        {data?.section?.name ? startCase(toLower(data.section.name)) : ''}
                     </Typography>
                 </Stack>
             </DialogTitle>
@@ -355,7 +356,12 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
                                                                 {dancer.total}
                                                             </TableCell>
                                                             <TableCell align="center">
-                                                                {dancer.place}
+                                                                <Chip
+                                                                    size="small"
+                                                                    label={dancer.place}
+                                                                    color="warning"
+                                                                    variant="outlined"
+                                                                />
                                                             </TableCell>
                                                         </TableRow>
                                                     ))}
