@@ -5,8 +5,8 @@ import { createPanel, updatePanel, deletePanel, getPanels } from "@/app/server/c
 import { createSection, updateSection, deleteSection, getCompetitionSections, getCompetitionSection, getSectionHeats } from "@/app/server/competitions/sectionActions";
 import { createDancer, updateDancer, deleteDancer, getSectionDancers } from "@/app/server/competitions/dancerActions";
 import { createHeat, updateHeat, deleteHeat, activateHeat, getHeatDancers, updateHeatDancers }from '@/app/server/competitions/heatActions'
-import { submitRoundMarks, getHeatRoundMarks, createHeatResult, getHeatRoundResult, approveHeatResult, deleteMarks } from "@/app/server/competitions/marksActions";
-import { printHeatResult } from "@/app/server/competitions/pdfActions";
+import { submitRoundMarks, getHeatRoundMarks, createHeatResult, getHeatRoundResult, approveHeatResult, deleteMarks, submitFinalMarks, approveFinalResult } from "@/app/server/competitions/marksActions";
+import { printHeatResult, printFinalResult } from "@/app/server/competitions/pdfActions";
 
 export {
     createCompetition,
@@ -40,5 +40,8 @@ export {
     createHeatResult,
     getHeatRoundResult,
     approveHeatResult,
+    submitFinalMarks,
     printHeatResult,
+    printFinalResult,
+    approveFinalResult,
 }
