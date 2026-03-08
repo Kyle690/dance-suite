@@ -18,6 +18,9 @@ import HeatStartListDialog from "@/app/components/dialogs/competition/section/He
 import HeatMarksRoundDialog from "@/app/components/dialogs/competition/section/HeatMarksRoundDialog";
 import HeatRoundReviewDialog from "@/app/components/dialogs/competition/section/HeatRoundReviewDialog";
 import HeatRoundResultDialog from "@/app/components/dialogs/competition/section/HeatRoundResultDialog";
+import HeatMarksFinalDialog from "@/app/components/dialogs/competition/section/HeatMarksFinalDialog";
+import HeatFinalReviewDialog from "@/app/components/dialogs/competition/section/HeatFinalReviewDialog";
+import HeatFinalResultDialog from "@/app/components/dialogs/competition/section/HeatFinalResultDialog";
 
 type SectionHeatRowButtonsProps = {
     data:any,
@@ -80,6 +83,15 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
                             refetch()
                         }
                     }
+
+                    if(data?.type===HeatType.FINAL) {
+                        const response = await dialogs.open (HeatFinalReviewDialog, {
+                            heat_id: data?.uid,
+                        })
+                        if(response){
+                            refetch()
+                        }
+                    }
                 }
             },
             {
@@ -88,6 +100,11 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
                 onClick:async()=>{
                     if(data?.type===HeatType.ROUND || data?.type===HeatType.QUARTER_FINAL || data?.type===HeatType.SEMI_FINAL){
                         await dialogs.open(HeatMarksRoundDialog,{
+                            ...data
+                        })
+                    }
+                    if(data?.type===HeatType.FINAL){
+                        await dialogs.open(HeatMarksFinalDialog,{
                             ...data
                         })
                     }
@@ -107,12 +124,14 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
                 }
             },
             {
-                label:'Review Result',
-                icon:<ListAlt color={'info'}/>,
-                onClick:async()=>{
-                    await dialogs.open(HeatRoundResultDialog, {
-                        heatId:String(data?.uid)
-                    })
+                label: 'Review Result',
+                icon: <ListAlt color={'info'}/>,
+                onClick: async () => {
+                    if (data?.type === HeatType.FINAL) {
+                        await dialogs.open(HeatFinalResultDialog, { heat_id: String(data?.uid) });
+                    } else {
+                        await dialogs.open(HeatRoundResultDialog, { heatId: String(data?.uid) });
+                    }
                 },
             },
         ]
@@ -190,12 +209,15 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
         if(data?.status===HeatStatus.CHECKING){
             return [
                 {
-                    label:'Review Result',
-                    icon:<ListAlt color={'info'}/>,
-                    onClick:async()=>{
-                        await dialogs.open(HeatRoundResultDialog, {
-                            heatId:String(data?.uid)
-                        })
+                    label: 'Review Result',
+                    icon: <ListAlt color={'info'}/>,
+                    onClick: async () => {
+                        if (data?.type === HeatType.FINAL) {
+                            await dialogs.open(HeatFinalResultDialog, { heat_id: String(data?.uid) });
+                        } else {
+                            await dialogs.open(HeatRoundResultDialog, { heatId: String(data?.uid) });
+                        }
+                        refetch();
                     },
                 },
                 {
