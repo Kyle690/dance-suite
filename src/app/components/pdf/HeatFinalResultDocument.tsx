@@ -22,7 +22,7 @@ export type HeatFinalResultDocumentProps = {
             date: Date | string | null;
             organization: string | null;
         };
-        adjudicators: { letter: string }[];
+        adjudicators: { letter: string, name?:string }[];
         skatingResults: SkatingResults;
     };
 };
@@ -51,7 +51,12 @@ const styles = StyleSheet.create({
         color: '#111111',
     },
     // ---- page header ----
+    headerBlockRow:{
+
+    },
     headerBlock: {
+        flexDirection:'row',
+        justifyContent:'space-between',
         borderBottomWidth: 1.5,
         borderBottomColor: '#111111',
         paddingBottom: 5,
@@ -108,6 +113,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         marginBottom: 5,
+        alignItems:'center',
         gap: 4,
     },
     panelChip: {
@@ -170,19 +176,23 @@ function formatDate(d: Date | string | null | undefined): string {
 
 type PageData = HeatFinalResultDocumentProps['data'];
 
-const PageHeader = ({ data }: { data: PageData }) => {
+const PageHeader = ({ data, type }: { data: PageData, type?:string }) => {
     const meta = [ data.competition.organization, data.competition.venue, formatDate(data.competition.date) ]
         .filter(Boolean)
         .join('   ·   ');
 
     return (
         <View style={styles.headerBlock}>
-            <Text style={styles.compName}>{data.competition.name ?? ''}</Text>
-            {meta ? <Text style={styles.compMeta}>{meta}</Text> : null}
-            <Text style={styles.heatMeta}>
-                {`Item No. ${data.item_no ?? ''}  —  ${startCase(toLower(String(data.section_name)))}  —  Finals`}
-            </Text>
+            <View >
+                <Text style={styles.compName}>{data.competition.name ?? ''}</Text>
+                {meta ? <Text style={styles.compMeta}>{meta}</Text> : null}
+                <Text style={styles.heatMeta}>
+                    {`Item No. ${data.item_no ?? ''}  —  ${startCase(toLower(String(data.section_name)))}  —  Finals`}
+                </Text>
+            </View>
+            <Text style={styles.sectionTitle}>{type}</Text>
         </View>
+
     );
 };
 
@@ -227,24 +237,33 @@ const WorkingPage = ({ data }: { data: PageData }) => {
     return (
         <Page
             size="A4"
-            orientation="landscape"
+            orientation="portrait"
             style={styles.page}
         >
-            <PageHeader data={data} />
-
-            <Text style={styles.sectionTitle}>Finals Working — Rules 9, 10 &amp; 11</Text>
+            <PageHeader data={data} type={'Final'} />
 
             {/* Panel strip */}
             {adjudicators.length > 0 && (
-                <View style={styles.panelRow}>
+                <View >
+                    <Text style={styles.sectionTitle}>
+                        Panel of Adjudicators
+                    </Text>
                     {adjudicators.map((adj, i) => (
-                        <Text key={i} style={styles.panelChip}>
-                            {adj.letter}
-                        </Text>
+                        <View key={i} style={styles.panelRow}>
+                            <Text key={i} style={styles.panelChip}>
+                                {adj.letter}
+                            </Text>
+                            <Text>
+                                {adj.name}
+                            </Text>
+                        </View>
+
                     ))}
                 </View>
             )}
-
+            {/* Divider before combined */}
+            <View style={styles.divider} />
+            <Text style={styles.sectionTitle}>Finals Working</Text>
             {/* Per-dance working tables */}
             {skatingResults.perDance.map((danceResult, di) => (
                 <View key={di}>
@@ -407,7 +426,7 @@ const ResultPage = ({ data }: { data: PageData }) => {
             orientation="portrait"
             style={styles.page}
         >
-            <PageHeader data={data} />
+            <PageHeader data={data} type={'Result Sheet - Final'} />
 
             <Text style={styles.sectionTitle}>Final Result</Text>
 

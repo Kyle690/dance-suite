@@ -31,8 +31,8 @@ const theme = createTheme({
                     contrastText: '#FFFFFF',
                 },
                 background: {
-                    default: '#F8F6F4',
-                    paper: '#FFFFFF',
+                    paper: "#fff",
+                    default: "#F5F5F5",
                 },
                 text: {
                     primary: '#1F1C1A',
@@ -49,20 +49,20 @@ const theme = createTheme({
         dark: {
             palette: {
                 primary: {
-                    main: '#D4825A',
-                    light: '#E8A882',
-                    dark: '#B5603A',
-                    contrastText: '#0F0D0C',
+                    main: '#E8E2D9',
+                    light: '#F5F2ED',
+                    dark: '#C8BFB2',
+                    contrastText: '#1F1C1A',
                 },
                 secondary: {
-                    main: '#3A3532',
-                    light: '#524E4A',
-                    dark: '#1F1C1A',
-                    contrastText: '#F5F3F0',
+                    main: '#B5603A',
+                    light: '#D4825A',
+                    dark: '#8A4220',
+                    contrastText: '#FFFFFF',
                 },
                 background: {
-                    default: '#100E0C',
-                    paper: '#1C1915',
+                    default: '#121212',
+                    paper: '#252525'
                 },
                 text: {
                     primary: '#F5F3F0',
@@ -120,7 +120,7 @@ const theme = createTheme({
             defaultProps: { disableElevation: true },
             styleOverrides: {
                 root: {
-                    borderRadius: 2,
+                    borderRadius: 10,
                     boxShadow: 'none',
                     '&:hover': { boxShadow: 'none' },
                     '&:active': { boxShadow: 'none' },

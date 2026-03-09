@@ -32,7 +32,13 @@ const Page: React.FC<pageProps> = () => {
     },[ tab ])
 
     return (
-        <Stack sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <Stack sx={{
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+        }}
+        >
             <Stack
                 direction={'row'}
                 alignItems={'center'}

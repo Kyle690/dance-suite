@@ -114,6 +114,8 @@ const SectionHeats: React.FC<SectionHeatsProps> = ({
                         field:'actions',
                         headerName:'Actions',
                         minWidth:80,
+                        align:'center',
+                        headerAlign:'center',
                         renderCell:(params)=>{
                             return (
                                 <SectionHeatRowButtons

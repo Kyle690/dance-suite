@@ -1,8 +1,8 @@
 'use client';
 import React, { Suspense } from 'react';
-import { ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material";
 import theme from "@/app/theme";
-import { CssBaseline, LinearProgress } from "@mui/material";
+import { CssBaseline, LinearProgress, Box } from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider as MuiLocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -19,27 +19,27 @@ const App: React.FC<AppProps> = ({
     children
 }) => {
     return (
-        <Suspense fallback={<LinearProgress />}>
-            <QueryClientProvider client={queryClient}>
-                <SnackbarProvider
-                    anchorOrigin={{
-                        vertical:'top',
-                        horizontal:'right',
-                    }}
-                    autoHideDuration={3000}
-                >
-                    <MuiLocalizationProvider
-                        dateAdapter={AdapterDayjs}
-                        adapterLocale={'en-gb'}
+        <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Suspense fallback={<LinearProgress />}>
+                <QueryClientProvider client={queryClient}>
+                    <SnackbarProvider
+                        anchorOrigin={{
+                            vertical:'top',
+                            horizontal:'right',
+                        }}
+                        autoHideDuration={3000}
                     >
-                        <ThemeProvider theme={theme}>
-                            <CssBaseline />
+                        <MuiLocalizationProvider
+                            dateAdapter={AdapterDayjs}
+                            adapterLocale={'en-gb'}
+                        >
                             {children}
-                        </ThemeProvider>
-                    </MuiLocalizationProvider>
-                </SnackbarProvider>
-            </QueryClientProvider>
-        </Suspense>
+                        </MuiLocalizationProvider>
+                    </SnackbarProvider>
+                </QueryClientProvider>
+            </Suspense>
+        </ThemeProvider>
     );
 }
 

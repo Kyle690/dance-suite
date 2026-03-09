@@ -4,7 +4,7 @@ import { AppProvider } from "@toolpad/core/AppProvider";
 import theme from "@/app/theme";
 import { Home, Event, Dashboard, ExitToAppOutlined, Settings } from '@mui/icons-material';
 import { DashboardLayout } from "@toolpad/core";
-import { IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
+import { CssBaseline, IconButton, Menu, MenuItem, Stack, Tooltip } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { getCompetition } from "@/app/server/competitions";
@@ -56,6 +56,7 @@ const Layout: React.FC<layoutProps> = ({
         queryFn:async()=>getCompetition(String(competitionId))
     })
 
+
     return (
         <AppProvider
             navigation={NAVIGATION}
@@ -65,6 +66,7 @@ const Layout: React.FC<layoutProps> = ({
             }}
             theme={theme}
         >
+            <CssBaseline />
             <DashboardLayout
                 hideNavigation
                 slots={{
@@ -76,6 +78,8 @@ const Layout: React.FC<layoutProps> = ({
                         competition:data?.data
                     },
                     appTitle:{
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-expect-error
                         competition:data?.data
                     }
                 }}
@@ -84,9 +88,10 @@ const Layout: React.FC<layoutProps> = ({
                     p={4}
                     sx={{
                         height: '100%',
+                        width:'100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        background:'background.paper',
+                        background:'custom.background',
                     }}
                 >
                     {children}

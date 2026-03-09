@@ -68,7 +68,7 @@ Table heat_result_dancer {
   heat_result_id String [not null]
   no_callbacks Int [not null, default: 0]
   callback Boolean [not null, default: false]
-  postiion Int
+  position Int
 }
 
 Table heat_marks {

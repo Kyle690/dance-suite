@@ -94,7 +94,7 @@ model heat_result_dancer {
   heat_result    heat_result @relation(fields: [heat_result_id], references: [uid], onDelete: Cascade)
   no_callbacks   Int         @default(0)
   callback       Boolean     @default(false)
-  postiion       Int?
+  position       Int?
 }
 
 enum HeatMarkInputType {

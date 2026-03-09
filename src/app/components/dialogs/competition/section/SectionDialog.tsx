@@ -23,6 +23,7 @@ import SectionHeats from "@/app/components/dialogs/competition/section/_componen
 import MenuButtons, { MenuButtonsProps } from "@/app/components/layout/MenuButtons";
 import SectionDetailsDialog from "@/app/components/dialogs/competition/SectionDetailsDialog";
 import HeatDialog from "@/app/components/dialogs/competition/section/HeatDialog";
+import { startCase, toLower } from "lodash";
 
 type SectionDialogProps = {}
 
@@ -82,20 +83,6 @@ const SectionDialog: React.FC<DialogProps<sections>> = ({
                 }
             ]
         }
-        if(activeTab===2){
-            return [
-                {
-                    label:'Add Heat',
-                    icon:<AddCircle color={'primary'}/>,
-                    color:'primary',
-                    onClick:async()=>{
-                        await dialogs.open(HeatDialog,{
-                            section_id:payload.uid
-                        })
-                    }
-                }
-            ]
-        }
         return []
     },[ activeTab, dialogs ])
 
@@ -113,7 +100,7 @@ const SectionDialog: React.FC<DialogProps<sections>> = ({
                     <Typography
                         variant={'h5'}
                     >
-                        {data?.name}
+                        {startCase(toLower(String(data?.name)))}
                     </Typography>
                     <IconButton
                         onClick={()=>onClose()}
@@ -150,7 +137,6 @@ const SectionDialog: React.FC<DialogProps<sections>> = ({
                             >
                                 <Tab label={'Details'}/>
                                 <Tab label={'Dancers'}/>
-                                <Tab label={'Heats'}/>
                             </Tabs>
                             <MenuButtons
                                 name={'section-dialog'}
@@ -160,13 +146,42 @@ const SectionDialog: React.FC<DialogProps<sections>> = ({
                         </Stack>
 
                         {activeTab===0 && (
-                            <SectionDetails data={data as sections}/>
+                            <Stack spacing={6}>
+                                <SectionDetails data={data as sections}/>
+                                <Stack spacing={0}>
+                                    <Stack
+                                        direction={'row'}
+                                        alignItems={'center'}
+                                        justifyContent={'space-between'}
+                                    >
+                                        <Typography variant={'h5'}>
+                                            Heats
+                                        </Typography>
+                                        <MenuButtons
+                                            name={'heat-buttons'}
+                                            id={payload.uid}
+                                            buttons={[
+                                                {
+                                                    label:'Add Heat',
+                                                    icon:<AddCircle color={'primary'}/>,
+                                                    color:'primary',
+                                                    onClick:async()=>{
+                                                        await dialogs.open(HeatDialog,{
+                                                            section_id:payload.uid
+                                                        })
+                                                    }
+                                                }
+                                            ]}
+                                        />
+                                    </Stack>
+                                    <SectionHeats sectionId={payload?.uid}/>
+                                </Stack>
+
+                            </Stack>
+
                         )}
                         {activeTab===1 && (
                             <SectionDancers sectionId={payload?.uid}/>
-                        )}
-                        {activeTab===2 &&(
-                            <SectionHeats sectionId={payload?.uid}/>
                         )}
                     </React.Fragment>
                 )}

@@ -15,4 +15,18 @@ export const RoundMarkSchema =z.array(z.object({
 
 export type RoundMarkSchemaType = z.infer<typeof RoundMarkSchema>;
 
+export const FinalMarkSchema = z.array(z.object({
+    heat_id: z.string(),
+    dance: z.string(),
+    letter: z.string(),
+    adjudicator_id: z.string(),
+    marks: z.array(z.object({
+        uid: z.string().min(8),
+        number: z.number(),
+        name: z.string(),
+        partner_name: z.string(),
+        mark: z.string().min(1),
+    }))
+}))
 
+export type FinalMarkSchemaType = z.infer<typeof FinalMarkSchema>;

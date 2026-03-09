@@ -1,10 +1,10 @@
 import { safeAction } from "@/app/lib/safeAction";
-import { RoundMarkSchema } from "@/app/schemas/MarksSchemas";
+import { RoundMarkSchema, FinalMarkSchema } from "@/app/schemas/MarksSchemas";
 import { groupBy, keys, forEach, sortBy, flatten } from "lodash";
 import { prisma } from "@/app/lib/prisma";
 import { CompetitionLogEventType, HeatMarkInputType, HeatStatus } from "@prisma/client";
 import { UidSchema } from "@/app/schemas/CommonSchema";
-import { SectionHeatRoundResultSchema } from "@/app/schemas/SectionSchema";
+import { SectionHeatRoundResultSchema, FinalResultSchema } from "@/app/schemas/SectionSchema";
 import { getCompetitionUser } from "@/app/server/competitions/competitionActions";
 import { TableCellProps } from "@mui/material/TableCell";
 
@@ -101,6 +101,75 @@ export const submitRoundMarks = safeAction.inputSchema(RoundMarkSchema).action(a
     return updatedHeat;
 
 })
+
+export const submitFinalMarks = safeAction.inputSchema(FinalMarkSchema).action(async ({
+    parsedInput,
+    ctx
+}) => {
+    const adjudicators = groupBy(parsedInput, 'adjudicator_id');
+
+    const competitionUser = await getCompetitionUser({
+        userId: ctx.user.id,
+        competitionId: String(ctx.competition_id)
+    });
+
+    for (const adjudicatorId of keys(adjudicators)) {
+        const danceMarks = adjudicators[adjudicatorId].reduce((a: {
+            dancer_id: string,
+            dancer_number: number,
+            dance: string,
+            mark: number
+        }[], v) => {
+            v.marks.forEach((mark) => {
+                a.push({
+                    dancer_id: mark.uid,
+                    dancer_number: Number(mark.number),
+                    dance: v.dance,
+                    mark: Number(mark.mark),
+                });
+            });
+            return a;
+        }, []);
+
+        await prisma.heat_marks.create({
+            data: {
+                adjudicator_id: adjudicatorId,
+                input_type: HeatMarkInputType.SCRUTINEER,
+                heat_id: parsedInput[0].heat_id,
+                scrutineer_id: competitionUser?.data?.uid || null,
+                marks: {
+                    createMany: { data: danceMarks }
+                }
+            }
+        });
+    }
+
+    const updatedHeat = await prisma.heat.update({
+        where: { uid: parsedInput[0].heat_id },
+        data: {
+            status: HeatStatus.REVIEWING,
+            competition_log: {
+                create: {
+                    user_id: competitionUser?.data?.uid || null,
+                    competition_id: String(ctx.competition_id),
+                    event_type: CompetitionLogEventType.HEAT_MARKS_ENTERED,
+                    data: parsedInput,
+                    note: `Final marks entered by scrutineer ${ctx.user?.name || 'Unknown User'}`,
+                }
+            }
+        },
+        include: {
+            heat_marks: {
+                include: {
+                    marks: { include: { dancer: true } }
+                }
+            },
+            section: { select: { name: true } },
+        }
+    });
+
+    return updatedHeat;
+});
 
 export const getHeatRoundMarks = safeAction.inputSchema(UidSchema).action(async({ parsedInput })=>{
     return prisma.heat.findUnique({
@@ -544,10 +613,62 @@ export const approveHeatResult = safeAction.inputSchema(UidSchema).action(async 
 });
 
 
+export const approveFinalResult = safeAction.inputSchema(FinalResultSchema).action(async ({
+    parsedInput,
+    ctx
+}) => {
+    const competitionUser = await getCompetitionUser({
+        userId: ctx.user.id,
+        competitionId: String(ctx.competition_id),
+    });
+
+    const heat = await prisma.heat.findUnique({
+        where: { uid: parsedInput.heat_id },
+        select: { uid: true, section_id: true },
+    });
+
+    if (!heat) throw new Error('Heat not found');
+
+    return prisma.heat.update({
+        where: { uid: heat.uid },
+        data: {
+            status: HeatStatus.CHECKING,
+            reviewed_at: new Date(),
+            reviewed_by_id: String(competitionUser?.data?.uid),
+            heat_result: {
+                create: {
+                    section_id: heat.section_id,
+                    created_by_id: String(competitionUser?.data?.uid),
+                    heat_result_dancer: {
+                        createMany: {
+                            data: parsedInput.results.map(r => ({
+                                dancer_id: r.dancer_id,
+                                position: r.place,
+                            })),
+                        },
+                    },
+                },
+            },
+            competition_log: {
+                create: {
+                    event_type: CompetitionLogEventType.HEAT_REVIEWING,
+                    competition_id: String(ctx.competition_id),
+                    user_id: String(competitionUser?.data?.uid),
+                    note: `Final results approved by ${ctx.user?.name || 'Unknown User'}`,
+                    data: parsedInput.results,
+                },
+            },
+        },
+        select: { uid: true, status: true, reviewed_at: true },
+    });
+});
+
+
 export default {
     submitRoundMarks,
     getHeatRoundMarks,
     createHeatResult,
     getHeatRoundResult,
     approveHeatResult,
+    approveFinalResult,
 }

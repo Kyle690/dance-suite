@@ -61,6 +61,7 @@ export const printFinalResult = safeAction.inputSchema(PrintFinalResultSchema).a
         data.panel?.panels_adjudicators?.map((p: any) => ({
             uid: p.adjudicator_id,
             letter: p.adjudicator.letter,
+            name: p.adjudicator.name,
         })) ?? [],
         'letter',
     );
@@ -99,7 +100,7 @@ export const printFinalResult = safeAction.inputSchema(PrintFinalResultSchema).a
                     date: data.section?.competition?.date ?? null,
                     organization: data.section?.competition?.organization ?? null,
                 },
-                adjudicators: adjudicators.map(a => ({ letter: a.letter })),
+                adjudicators: adjudicators.map(a => ({ letter: a.letter, name: a.name })),
                 skatingResults,
             },
             mode: parsedInput.mode as FinalPrintMode,

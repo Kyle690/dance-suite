@@ -36,6 +36,7 @@ const SectionDetails: React.FC<SectionDetailsProps> = ({
                 py:2,
                 border:`1px solid ${grey[300]}`,
                 borderRadius:4,
+                borderTopLeftRadius:0
             }}
         >
             <TableContainer>

@@ -92,3 +92,13 @@ export const SectionHeatRoundResultSchema = z.object({
         called_back:z.boolean()
     })),
 })
+
+export const FinalResultSchema = z.object({
+    heat_id: z.string().min(8),
+    results: z.array(z.object({
+        dancer_id: z.string().min(8),
+        place: z.number().int().positive(),
+    })),
+})
+
+export type FinalResultSchemaType = z.infer<typeof FinalResultSchema>;

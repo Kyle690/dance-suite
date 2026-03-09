@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import App from "@/app/components/App";
-import './globals.css'
 
 export const metadata: Metadata = {
     title: "Dance Suite Scrutineer",

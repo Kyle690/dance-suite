@@ -79,6 +79,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
                 disabled={rest.disabled}
                 onBlur={rest.onBlur as FocusEventHandler<HTMLInputElement>}
                 size={rest?.size}
+                sx={rest?.sx}
             />
         )
     }

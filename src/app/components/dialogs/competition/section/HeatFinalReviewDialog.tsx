@@ -1,23 +1,16 @@
 'use client';
-import React, { useCallback, useRef, useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
     Alert,
     Box,
     Button,
-    ButtonGroup,
     Chip,
     CircularProgress,
-    ClickAwayListener,
     Dialog,
     DialogActions,
     DialogContent,
     DialogTitle,
     Divider,
-    Grow,
-    MenuItem,
-    MenuList,
-    Paper,
-    Popper,
     Stack,
     Table,
     TableBody,
@@ -27,50 +20,34 @@ import {
     TableRow,
     Typography,
 } from '@mui/material';
-import {ArrowDropDown, CheckCircle, Print} from '@mui/icons-material';
-import {DialogProps, useDialogs} from '@toolpad/core';
-import {useQuery, useQueryClient} from '@tanstack/react-query';
+import { DialogProps, useDialogs } from '@toolpad/core';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { sortBy, startCase, toLower } from 'lodash';
-import {approveHeatResult, getHeatRoundMarks, printFinalResult} from '@/app/server/competitions';
+import { approveFinalResult, getHeatRoundMarks } from '@/app/server/competitions';
 import { buildSkatingResults, DanceResult, RawMarkEntry } from '@/app/lib/skating';
-import { FinalPrintMode } from '@/app/components/pdf/HeatFinalResultDocument';
-import {HeatStatus} from "@prisma/client";
 
-type HeatFinalResultDialogProps = {
+type HeatFinalReviewDialogProps = {
     heat_id: string;
 };
 
-const PRINT_OPTIONS: { label: string; mode: FinalPrintMode }[] = [
-    { label: 'Print Working + Results', mode: 'both' },
-    { label: 'Print Working Only', mode: 'working' },
-    { label: 'Print Results Only', mode: 'result' },
-];
-
-const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> = ({
+const HeatFinalReviewDialog: React.FC<DialogProps<HeatFinalReviewDialogProps, boolean>> = ({
     open,
     onClose,
     payload,
 }) => {
     const { enqueueSnackbar } = useSnackbar();
-    const [ printing, setPrinting ] = useState(false);
-    const [ menuOpen, setMenuOpen ] = useState(false);
-    const [ approving, setApproving ] = useState(false);
-    const anchorRef = useRef<HTMLDivElement>(null);
+    const dialogs = useDialogs();
 
     // ── Data loading ──────────────────────────────────────────────────────────
     const { data, isLoading } = useQuery({
-        queryKey: [ 'get-final-result-data', payload.heat_id ],
+        queryKey: ['get-final-review-data', payload.heat_id],
         queryFn: async () => {
             const res = await getHeatRoundMarks(payload.heat_id);
             return res.data;
         },
         enabled: open && Boolean(payload.heat_id),
     });
-
-    const dialogs = useDialogs()
-
-    const queryClient = useQueryClient();
 
     // ── Skating calculation ───────────────────────────────────────────────────
     const adjudicators = useMemo(
@@ -79,11 +56,11 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
                 data?.panel?.panels_adjudicators?.map(p => ({
                     uid: p.adjudicator_id,
                     letter: p.adjudicator.letter,
-                    name:p.adjudicator.name,
+                    name:p.adjudicator.name
                 })),
                 'letter',
             ) ?? [],
-        [ data ],
+        [data],
     );
 
     const skatingResults = useMemo(() => {
@@ -111,38 +88,47 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
         }));
 
         return buildSkatingResults(data.dances ?? [], adjudicators, dancers, rawMarks);
-    }, [ data, adjudicators ]);
+    }, [data, adjudicators]);
 
-    // ── Print handler ─────────────────────────────────────────────────────────
-    const handlePrint = useCallback(async (mode: FinalPrintMode) => {
-        setMenuOpen(false);
-        setPrinting(true);
-        try {
-            const result = await printFinalResult({ heat_id: payload.heat_id, mode });
-            const base64 = result?.data;
-            if (!base64) {
-                enqueueSnackbar('Failed to generate PDF', { variant: 'error' });
+    const allMarksEntered = useMemo(() => {
+        if (!data) return false;
+        return data.heat_marks.length === (data.panel?.panels_adjudicators?.length ?? 0);
+    }, [data]);
+
+    // ── Approve mutation ──────────────────────────────────────────────────────
+    const { mutate, isPending } = useMutation({
+        mutationKey: ['approve-final-result', payload.heat_id],
+        mutationFn: async () => {
+            if (!skatingResults) throw new Error('No results calculated');
+            return approveFinalResult({
+                heat_id: payload.heat_id,
+                results: skatingResults.combined.map(d => ({
+                    dancer_id: d.dancer_id,
+                    place: d.place,
+                })),
+            });
+        },
+        onSuccess: res => {
+            if (res?.data) {
+                enqueueSnackbar('Final results approved', { variant: 'success' });
+                onClose(true);
                 return;
             }
+            enqueueSnackbar('Failed to approve final results', { variant: 'error' });
+        },
+        onError: () => {
+            enqueueSnackbar('Error approving final results', { variant: 'error' });
+        },
+    });
 
-            const binary = atob(base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            const blob = new Blob([ bytes ], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-            const win = window.open(url, '_blank');
-            if (win) {
-                setTimeout(() => URL.revokeObjectURL(url), 10000);
-            }
-        } catch (err) {
-            console.error('PDF generation error:', err);
-            enqueueSnackbar('Failed to generate PDF', { variant: 'error' });
-        } finally {
-            setPrinting(false);
-        }
-    }, [ payload.heat_id, enqueueSnackbar ]);
+    const onApprove = async () => {
+        await dialogs.confirm('Confirm final results and submit for checking?', {
+            title: 'Confirm Approval',
+            onClose: async confirmed => {
+                if (confirmed) mutate();
+            },
+        });
+    };
 
     // ── Per-dance table renderer ──────────────────────────────────────────────
     const renderDanceTable = (danceResult: DanceResult) => {
@@ -151,10 +137,7 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
 
         return (
             <Box key={danceResult.dance} mb={4}>
-                <Typography
-                    variant="subtitle1" fontWeight="bold"
-                    mb={1}
-                >
+                <Typography variant="subtitle1" fontWeight="bold" mb={1}>
                     {startCase(toLower(danceResult.dance))}
                 </Typography>
                 <TableContainer sx={{ overflowX: 'auto' }}>
@@ -168,15 +151,12 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
                                     </TableCell>
                                 ))}
                                 {ordinals.map(p => (
-                                    <TableCell
-                                        key={p} align="center"
-                                        sx={{ fontFamily: 'monospace' }}
-                                    >
+                                    <TableCell key={p} align="center" sx={{ fontFamily: 'monospace' }}>
                                         1-{p}
                                     </TableCell>
                                 ))}
                                 <TableCell align="center">Place</TableCell>
-                                <TableCell align="center">Rule</TableCell>
+                                <TableCell align={'center'}>Rule</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -187,7 +167,7 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
                                         const jm = dancer.judgeMarks.find(j => j.adjudicator_id === adj.uid);
                                         return (
                                             <TableCell key={adj.uid} align="center">
-                                                {jm?.mark && jm.mark > 0 ? jm.mark : '-'}
+                                                {jm?.mark ?? '-'}
                                             </TableCell>
                                         );
                                     })}
@@ -219,7 +199,7 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
                                     <TableCell align="center">
                                         {dancer.place}
                                     </TableCell>
-                                    <TableCell align="center">
+                                    <TableCell align={'center'}>
                                         {dancer.rule}
                                     </TableCell>
                                 </TableRow>
@@ -231,59 +211,29 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
         );
     };
 
-    const handleApprove = useCallback(async () => {
-        if (!payload?.heat_id) return;
-        const confirmed = await dialogs.confirm(
-            'Approving the result will mark this heat as Complete and cannot be undone.',
-            { title: 'Approve Result?' }
-        );
-        if (!confirmed) return;
-
-        setApproving(true);
-        try {
-            const result = await approveHeatResult(payload.heat_id);
-            if (result?.data) {
-                enqueueSnackbar('Heat result approved', { variant: 'success' });
-                await queryClient.invalidateQueries({ queryKey: [ 'get-final-result-data', payload.heat_id ] });
-                await queryClient.invalidateQueries({ queryKey: [ 'section-heats' ] });
-                onClose();
-            }
-        } catch (err) {
-            console.error('Approve error:', err);
-            enqueueSnackbar('Failed to approve result', { variant: 'error' });
-        } finally {
-            setApproving(false);
-        }
-    }, [ payload?.heat_id, dialogs, enqueueSnackbar, queryClient, onClose ]);
-
     // ── Render ────────────────────────────────────────────────────────────────
     return (
-        <Dialog
-            open={open} fullWidth
-            maxWidth="lg"
-        >
+        <Dialog open={open} fullWidth maxWidth="lg">
             <DialogTitle>
-                <Stack
-                    direction="row" justifyContent="space-between"
-                    alignItems="center"
-                >
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
                     <Typography variant="h6">
-                        {data?.item_no ?? ''} — Finals Result
+                        {data?.item_no} — Finals Review
                     </Typography>
-                    <Typography variant="h6">
-                        {data?.section?.name ? startCase(toLower(data.section.name)) : ''}
+                    <Typography variant={'h6'}>
+                        {startCase(toLower(String(data?.section?.name)))}
                     </Typography>
                 </Stack>
             </DialogTitle>
 
             <DialogContent>
                 {isLoading ? (
-                    <Stack
-                        alignItems="center" justifyContent="center"
-                        py={6}
-                    >
+                    <Stack alignItems="center" justifyContent="center" py={6}>
                         <CircularProgress />
                     </Stack>
+                ) : !allMarksEntered ? (
+                    <Alert severity="error">
+                        Not all adjudicators have entered marks. All marks must be submitted before reviewing.
+                    </Alert>
                 ) : !skatingResults ? null : (
                     <Stack spacing={4} mt={1}>
                         {/* Per-dance tables */}
@@ -331,7 +281,7 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
                                                 <TableCell align="center">
                                                     {dancer.place}
                                                 </TableCell>
-                                                <TableCell align="center">
+                                                <TableCell align={'center'}>
                                                     {dancer.rule}
                                                 </TableCell>
                                             </TableRow>
@@ -408,66 +358,26 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
             </DialogContent>
 
             <DialogActions>
-                {data?.status !== HeatStatus.COMPLETE && (
-                    <Button
-                        onClick={handleApprove}
-                        variant={'contained'}
-                        size={'small'}
-                        color={'success'}
-                        disabled={!data || approving}
-                        startIcon={approving ? <CircularProgress size={14} /> : <CheckCircle />}
-                    >
-                        Approve Result
-                    </Button>
-                )}
-                <ButtonGroup
-                    ref={anchorRef} variant="outlined"
-                    size="small" color="primary"
-                    disabled={!skatingResults || printing}
-                >
-                    <Button
-                        onClick={() => handlePrint('both')}
-                        startIcon={printing ? <CircularProgress size={14} /> : <Print />}
-                    >
-                        Print
-                    </Button>
-                    <Button
-                        size="small" onClick={() => setMenuOpen(prev => !prev)}
-                        sx={{ px: 0.5, minWidth: 28 }}
-                    >
-                        <ArrowDropDown />
-                    </Button>
-                </ButtonGroup>
-                <Popper
-                    open={menuOpen} anchorEl={anchorRef.current}
-                    placement="top-end" transition
-                    disablePortal style={{ zIndex: 9999 }}
-                >
-                    {({ TransitionProps }) => (
-                        <Grow {...TransitionProps} style={{ transformOrigin: 'right bottom' }}>
-                            <Paper elevation={4}>
-                                <ClickAwayListener onClickAway={() => setMenuOpen(false)}>
-                                    <MenuList dense>
-                                        {PRINT_OPTIONS.map(opt => (
-                                            <MenuItem key={opt.mode} onClick={() => handlePrint(opt.mode)}>
-                                                {opt.label}
-                                            </MenuItem>
-                                        ))}
-                                    </MenuList>
-                                </ClickAwayListener>
-                            </Paper>
-                        </Grow>
-                    )}
-                </Popper>
                 <Button
-                    size="small" color="inherit"
-                    variant="contained" onClick={() => onClose()}
+                    size="small"
+                    color="inherit"
+                    variant="contained"
+                    onClick={() => onClose(false)}
                 >
                     Close
+                </Button>
+                <Button
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    onClick={onApprove}
+                    disabled={isPending || !allMarksEntered || !skatingResults}
+                >
+                    {isPending ? <CircularProgress size={20} color="inherit" /> : 'Approve'}
                 </Button>
             </DialogActions>
         </Dialog>
     );
 };
 
-export default HeatFinalResultDialog;
+export default HeatFinalReviewDialog;

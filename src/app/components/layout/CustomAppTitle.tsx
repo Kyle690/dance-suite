@@ -47,20 +47,26 @@ const CustomAppTitle: React.FC<CustomAppTitleProps> = ({
                     alignItems={'center'}
                     spacing={2}
                 >
-                    <Typography variant={'caption'}>
-                        {competition?.venue}
-                    </Typography>
-                    <Typography variant={'caption'}>
-                        {dayjs(competition?.date).format('DD/MM/YYYY')}
-                    </Typography>
+                    {competition?.venue && (
+                        <Typography variant={'caption'}>
+                            {competition.venue}
+                        </Typography>
+                    )}
+                    {competition?.date && (
+                        <Typography variant={'caption'}>
+                            {dayjs(competition.date).format('DD/MM/YYYY')}
+                        </Typography>
+                    )}
                 </Stack>
             </Stack>
-            <Chip
-                color={statusColor(competition?.status)}
-                label={startCase(toLower(competition?.status))}
-                size={'small'}
-                sx={{ ml: 2, height: 24, mt: 0.5 }}
-            />
+            {competition?.status && (
+                <Chip
+                    color={statusColor(competition.status)}
+                    label={startCase(toLower(competition.status))}
+                    size={'small'}
+                    sx={{ ml: 2, height: 24, mt: 0.5 }}
+                />
+            )}
         </Stack>
     );
 }

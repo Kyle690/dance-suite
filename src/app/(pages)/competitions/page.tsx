@@ -102,10 +102,20 @@ const Competitions = ()=>{
         <Container
             maxWidth={'lg'}
             sx={{
-                p:4
+                p:4,
+                display:'flex',
+                flex:1,
+                flexDirection:'column',
+                minHeight:'100vh'
             }}
         >
-            <Card>
+            <Card
+                sx={{
+                    flex:1,
+                    display:'flex',
+                    flexDirection:'column',
+                }}
+            >
                 <CardHeader
                     title={'Competitions'}
                     subheader={'All competitions you have created or are managing'}
@@ -120,34 +130,39 @@ const Competitions = ()=>{
                         </Button>
                     )}
                 />
-                <CardContent>
-                    <div style={{ height: 700, width: '100%' }}>
-                        <DataGrid
-                            rows={data}
-                            columns={columns}
-                            density={'compact'}
-                            getRowId={(row)=>row.uid}
-                            showToolbar
-                            sx={{
-                                backgroundColor:'background.paper',
-                                borderRadius:4,
-                                '& .MuiDataGrid-columnHeader': {
-                                    backgroundColor: 'background.paper',
-                                },
-                            }}
-                            slotProps={{
-                                toolbar: {
-                                    showQuickFilter: true,
-                                    csvOptions: { disableToolbarButton: true },
-                                    printOptions: { disableToolbarButton: true },
-                                },
-                                loadingOverlay:{
-                                    variant:'linear-progress',
-                                    noRowsVariant:'skeleton'
-                                }
-                            }}
-                        />
-                    </div>
+                <CardContent
+                    sx={{
+                        display:'flex',
+                        flex:1,
+                    }}
+                >
+                    <DataGrid
+                        rows={data}
+                        columns={columns}
+                        density={'compact'}
+                        getRowId={(row)=>row.uid}
+                        showToolbar
+                        sx={{
+                            backgroundColor:'background.paper',
+                            borderRadius:4,
+                            '& .MuiDataGrid-columnHeader': {
+                                backgroundColor: 'background.paper',
+                            },
+                            flex: 1,
+                            minHeight: 0,
+                        }}
+                        slotProps={{
+                            toolbar: {
+                                showQuickFilter: true,
+                                csvOptions: { disableToolbarButton: true },
+                                printOptions: { disableToolbarButton: true },
+                            },
+                            loadingOverlay:{
+                                variant:'linear-progress',
+                                noRowsVariant:'skeleton'
+                            }
+                        }}
+                    />
                 </CardContent>
             </Card>
             <CompetitionDetailsDialog
