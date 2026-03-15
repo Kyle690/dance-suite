@@ -41,7 +41,7 @@ model heat {
   checked_by_id   String?               @db.Uuid
   checked_by      competition_users?    @relation("competition_user_heat_checked_by", fields: [checked_by_id], references: [uid])
   checked_at      DateTime?
-  competitionLogs competition_log[]
-  heatMarks       heat_marks[]
-  heatResults     heat_result[]
+  competition_log competition_log[]
+  heat_marks      heat_marks[]
+  heat_result     heat_result[]
 }

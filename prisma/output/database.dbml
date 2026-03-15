@@ -405,6 +405,8 @@ Ref: competition_schedule.competition_id > competition.uid
 
 Ref: competition_users.competition_id > competition.uid
 
+Ref: competition_users.user_id > users.uid
+
 Ref: dancers.section_id > sections.uid [delete: Cascade]
 
 Ref: dancers.created_by_id > competition_users.uid

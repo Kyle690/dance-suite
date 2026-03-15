@@ -8,9 +8,9 @@ model panels {
   is_deleted         Boolean               @default(false)
   deleted_at         DateTime?
   deleted_by_id      String?               @db.Uuid
-  competitionLogs    competition_log[]
-  heat               heat[]
-  panelsAdjudicators panels_adjudicators[]
+  competition_log     competition_log[]
+  heat                heat[]
+  panels_adjudicators panels_adjudicators[]
 }
 
 model panels_adjudicators {

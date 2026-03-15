@@ -25,7 +25,7 @@ model competition_users {
   dancer_created_by dancers[]         @relation("dancer_created_by")
   dancer_updated_by dancers[]         @relation("dancer_updated_by")
   dancer_deleted_by dancers[]         @relation("dancer_deleted_by")
-  competitionLogs   competition_log[]
-  heatMarks         heat_marks[]
-  heatResults       heat_result[]
+  competition_log   competition_log[]
+  heat_marks        heat_marks[]
+  heat_result       heat_result[]
 }

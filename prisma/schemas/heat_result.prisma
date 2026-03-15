@@ -8,7 +8,7 @@ model heat_result {
   heat              heat                 @relation(fields: [heat_id], references: [uid])
   created_by_id     String               @db.Uuid
   created_by        competition_users    @relation(fields: [created_by_id], references: [uid])
-  heatResultDancers heat_result_dancer[]
+  heat_result_dancer heat_result_dancer[]
 }
 
 model heat_result_dancer {

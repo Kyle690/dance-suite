@@ -7,25 +7,25 @@ enum CompetitionStatus {
 }
 
 model competition {
-  uid                  String                 @id @unique @default(uuid()) @db.Uuid
-  created              DateTime               @default(now())
-  updated              DateTime               @updatedAt
-  name                 String
-  venue                String?
-  date                 DateTime?
-  organizer_name       String?
-  organizer_email      String?
-  organization         String?
-  website              String?
-  is_deleted           Boolean                @default(false)
-  deleted_at           DateTime?
-  deleted_by_id        String?                @db.Uuid
-  status               CompetitionStatus      @default(DRAFT)
-  adjudicators         adjudicator[]
-  competitionLogs      competition_log[]
-  competitionNotes     competition_notes[]
-  competitionSchedules competition_schedule[]
-  competitionUsers     competition_users[]
+  uid                   String                 @id @unique @default(uuid()) @db.Uuid
+  created               DateTime               @default(now())
+  updated               DateTime               @updatedAt
+  name                  String
+  venue                 String?
+  date                  DateTime?
+  organizer_name        String?
+  organizer_email       String?
+  organization          String?
+  website               String?
+  is_deleted            Boolean                @default(false)
+  deleted_at            DateTime?
+  deleted_by_id         String?                @db.Uuid
+  status                CompetitionStatus      @default(DRAFT)
+  adjudicator          adjudicator[]
+  competition_log      competition_log[]
+  competition_notes    competition_notes[]
+  competition_schedule competition_schedule[]
+  competition_users    competition_users[]
   panels               panels[]
   sections             sections[]
 }

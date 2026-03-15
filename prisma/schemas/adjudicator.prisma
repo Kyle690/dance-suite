@@ -13,6 +13,6 @@ model adjudicator {
   is_deleted         Boolean               @default(false)
   deleted_at         DateTime?
   deleted_by_id      String?               @db.Uuid
-  heatMarks          heat_marks[]
-  panelsAdjudicators panels_adjudicators[]
+  heat_marks          heat_marks[]
+  panels_adjudicators panels_adjudicators[]
 }
