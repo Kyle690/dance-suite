@@ -528,8 +528,8 @@ const HeatMarksFinalDialog: React.FC<DialogProps<HeatMarksFinalDialogProps>> = (
                                 <Button
                                     variant={'contained'}
                                     fullWidth
-                                    onClick={()=>onPrevious('dance')}
-                                    disabled={currentDanceIndex===0}
+                                    onClick={()=>setActivePosition(prev=>prev-1)}
+                                    disabled={activePosition===0}
                                     size={'small'}
                                 >
                                     Previous
@@ -539,6 +539,14 @@ const HeatMarksFinalDialog: React.FC<DialogProps<HeatMarksFinalDialogProps>> = (
                                     fullWidth
                                     color={'inherit'}
                                     size={'small'}
+                                    onClick={()=>{
+                                        const updatedFormState = [ ...formState ];
+                                        updatedFormState[activePosition].marks = updatedFormState[activePosition].marks?.map(mark=>({
+                                            ...mark,
+                                            mark:''
+                                        }))
+                                        setFormState(updatedFormState);
+                                    }}
                                 >
                                     Clear
                                 </Button>
@@ -560,8 +568,8 @@ const HeatMarksFinalDialog: React.FC<DialogProps<HeatMarksFinalDialogProps>> = (
                                 <Button
                                     variant={'contained'}
                                     fullWidth
-                                    onClick={()=>onNext('enter')}
-                                    disabled={currentDanceIndex===dances.length-1}
+                                    onClick={()=>setActivePosition(prev=>prev+1)}
+                                    disabled={activePosition===formState?.length-1}
                                     size={'small'}
                                 >
                                     Next

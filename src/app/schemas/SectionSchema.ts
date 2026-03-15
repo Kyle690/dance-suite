@@ -26,7 +26,7 @@ export type SectionSchemaType = z.infer<typeof SectionSchema>;
 export const DancerSchema = z.object({
     uid: z.string().uuid().optional(),
     number:z.string(),
-    name:z.string(),
+    name:z.string().optional(),
     partner_name:z.string().optional().nullable(),
     studio:z.string().optional().nullable(),
     region:z.string().optional().nullable(),

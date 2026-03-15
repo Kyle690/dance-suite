@@ -17,4 +17,5 @@ model heat_marks {
   input_type     HeatMarkInputType  @default(JUDGE)
   scrutineer_id  String?            @db.Uuid
   scrutineer     competition_users? @relation(fields: [scrutineer_id], references: [uid])
+  marks          marks[]
 }

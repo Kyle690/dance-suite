@@ -57,4 +57,9 @@ model sections {
   category         SectionCategory?
   custom_name      Boolean           @default(false)
   competitive_type CompetitiveType   @default(COMPETITIVE)
+  competitionLogs  competition_log[]
+  dancers          dancers[]
+  heat             heat[]
+  heatResults      heat_result[]
+  sectionResults   section_result[]
 }

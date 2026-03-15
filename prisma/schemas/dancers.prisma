@@ -5,23 +5,29 @@ enum DancerCreatedByType {
 }
 
 model dancers {
-  uid           String              @id @unique @default(uuid()) @db.Uuid
-  created       DateTime            @default(now())
-  updated       DateTime            @updatedAt
-  number        Int?
-  name          String?
-  partner_name  String?
-  studio        String?
-  region        String?
-  country       String?
-  section_id    String              @db.Uuid
-  section       sections            @relation(fields: [section_id], references: [uid], onDelete: Cascade)
-  meta_data     Json?
-  created_type  DancerCreatedByType @default(SCRUTINEER)
-  created_by_id String?             @db.Uuid
-  created_by    competition_users?  @relation("dancer_created_by", fields: [created_by_id], references: [uid])
-  updated_by_id String?             @db.Uuid
-  updated_by    competition_users?  @relation("dancer_updated_by", fields: [updated_by_id], references: [uid])
-  deleted_by_id String?             @db.Uuid
-  deleted_by    competition_users?  @relation("dancer_deleted_by", fields: [deleted_by_id], references: [uid])
+  uid               String               @id @unique @default(uuid()) @db.Uuid
+  created           DateTime             @default(now())
+  updated           DateTime             @updatedAt
+  number            Int?
+  name              String?
+  partner_name      String?
+  studio            String?
+  region            String?
+  country           String?
+  section_id        String               @db.Uuid
+  section           sections             @relation(fields: [section_id], references: [uid], onDelete: Cascade)
+  meta_data         Json?
+  created_type      DancerCreatedByType  @default(SCRUTINEER)
+  created_by_id     String?              @db.Uuid
+  created_by        competition_users?   @relation("dancer_created_by", fields: [created_by_id], references: [uid])
+  updated_by_id     String?              @db.Uuid
+  updated_by        competition_users?   @relation("dancer_updated_by", fields: [updated_by_id], references: [uid])
+  deleted_by_id     String?              @db.Uuid
+  deleted_by        competition_users?   @relation("dancer_deleted_by", fields: [deleted_by_id], references: [uid])
+  competitionLogs   competition_log[]
+  heat              heat?                @relation(fields: [heatUid], references: [uid])
+  heatUid           String?              @db.Uuid
+  heatResultDancers heat_result_dancer[]
+  marks             marks[]
+  sectionResults    section_result[]
 }

@@ -1,13 +1,14 @@
 model heat_result {
-  uid           String            @id @unique @default(uuid()) @db.Uuid
-  created       DateTime          @default(now())
-  updated       DateTime          @updatedAt
-  heat_id       String            @db.Uuid
-  section_id    String            @db.Uuid
-  section       sections          @relation(fields: [section_id], references: [uid], onDelete: Cascade)
-  heat          heat              @relation(fields: [heat_id], references: [uid])
-  created_by_id String            @db.Uuid
-  created_by    competition_users @relation(fields: [created_by_id], references: [uid])
+  uid               String               @id @unique @default(uuid()) @db.Uuid
+  created           DateTime             @default(now())
+  updated           DateTime             @updatedAt
+  heat_id           String               @db.Uuid
+  section_id        String               @db.Uuid
+  section           sections             @relation(fields: [section_id], references: [uid], onDelete: Cascade)
+  heat              heat                 @relation(fields: [heat_id], references: [uid])
+  created_by_id     String               @db.Uuid
+  created_by        competition_users    @relation(fields: [created_by_id], references: [uid])
+  heatResultDancers heat_result_dancer[]
 }
 
 model heat_result_dancer {

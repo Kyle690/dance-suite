@@ -304,19 +304,28 @@ export const createHeatResult = safeAction.inputSchema(SectionHeatRoundResultSch
 
         console.log('No next heat found, creating new heat', latestHeat?.item_no);
 
+        const calledBackDancers = parsedInput.results.filter((r)=>r.called_back).length;
+        const nextHeatType =  calledBackDancers <=9 ? "FINAL": calledBackDancers<=12? "SEMI_FINAL" : "ROUND";
 
         nextHeat = await prisma.heat.create({
             data:{
                 section_id:heat.section_id,
                 item_no:String(Number(latestHeat?.item_no) + 1 || 1),
                 order:(heat?.order || 0) + 1,
-                type:heat.type,
+                type:nextHeatType,
                 status:HeatStatus.DRAFT,
                 dances:{
                     set:heat.dances
                 },
                 panel_id:heat.panel_id,
                 callback_limit:0,
+                start_list:{
+                    connect:parsedInput.results.filter((r)=>r.called_back).map((r)=>{
+                        return{
+                            uid:r.dancer_id
+                        }
+                    })
+                },
                 competition_log:{
                     create:{
                         event_type:CompetitionLogEventType.HEAT_CREATED,

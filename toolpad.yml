@@ -1,0 +1,24 @@
+name: dance-suite-scrutineer
+title: Dance Suite Scrutineer
+
+# Application configuration
+app:
+  title: "Dance Suite Scrutineer"
+  description: "A comprehensive dance competition management system"
+  
+# Theme configuration
+theme:
+  colorScheme: light
+  primaryColor: "#1976d2"
+  
+# Navigation configuration
+pages:
+  - path: "/"
+    title: "Home"
+    icon: "home"
+  - path: "/dashboard"
+    title: "Dashboard" 
+    icon: "dashboard"
+  - path: "/competitions"
+    title: "Competitions"
+    icon: "event"

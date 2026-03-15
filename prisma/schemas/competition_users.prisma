@@ -12,16 +12,20 @@ model competition_users {
   updated        DateTime            @updatedAt
   competition_id String              @db.Uuid
   competition    competition         @relation(fields: [competition_id], references: [uid])
-  user_id        String              @db.Uuid // Clerk Uid
+  user_id        String              @db.Uuid
+  user           users               @relation(fields: [user_id], references: [uid])
   role           CompetitionUserRole @default(VIEWER)
   is_deleted     Boolean             @default(false)
   deleted_at     DateTime?
   is_active      Boolean             @default(true)
 
   // relationships
-  heat_reviewed_by  heat[]    @relation("competition_user_heat_reviewed_by")
-  heat_checked_by   heat[]    @relation("competition_user_heat_checked_by")
-  dancer_created_by dancers[] @relation("dancer_created_by")
-  dancer_updated_by dancers[] @relation("dancer_updated_by")
-  dancer_deleted_by dancers[] @relation("dancer_deleted_by")
+  heat_reviewed_by  heat[]            @relation("competition_user_heat_reviewed_by")
+  heat_checked_by   heat[]            @relation("competition_user_heat_checked_by")
+  dancer_created_by dancers[]         @relation("dancer_created_by")
+  dancer_updated_by dancers[]         @relation("dancer_updated_by")
+  dancer_deleted_by dancers[]         @relation("dancer_deleted_by")
+  competitionLogs   competition_log[]
+  heatMarks         heat_marks[]
+  heatResults       heat_result[]
 }

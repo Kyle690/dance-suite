@@ -19,26 +19,29 @@ enum HeatStatus {
 }
 
 model heat {
-  uid            String                @id @unique @default(uuid()) @db.Uuid
-  created        DateTime              @default(now())
-  updated        DateTime              @updatedAt
-  section_id     String                @db.Uuid
-  section        sections              @relation(fields: [section_id], references: [uid], onDelete: Cascade)
-  order          Int?
-  item_no        String
-  status         HeatStatus            @default(DRAFT)
-  type           HeatType              @default(ROUND)
-  callback_limit Int?
-  dances         String[]
-  start_list     dancers[]
-  panel_id       String?               @db.Uuid
-  panel          panels?               @relation(fields: [panel_id], references: [uid])
-  schedule_id    String?               @db.Uuid
-  schedule       competition_schedule? @relation(fields: [schedule_id], references: [uid])
-  reviewed_by_id String?               @db.Uuid
-  reviewed_by    competition_users?    @relation("competition_user_heat_reviewed_by", fields: [reviewed_by_id], references: [uid])
-  reviewed_at    DateTime?
-  checked_by_id  String?               @db.Uuid
-  checked_by     competition_users?    @relation("competition_user_heat_checked_by", fields: [checked_by_id], references: [uid])
-  checked_at     DateTime?
+  uid             String                @id @unique @default(uuid()) @db.Uuid
+  created         DateTime              @default(now())
+  updated         DateTime              @updatedAt
+  section_id      String                @db.Uuid
+  section         sections              @relation(fields: [section_id], references: [uid], onDelete: Cascade)
+  order           Int?
+  item_no         String
+  status          HeatStatus            @default(DRAFT)
+  type            HeatType              @default(ROUND)
+  callback_limit  Int?
+  dances          String[]
+  start_list      dancers[]
+  panel_id        String?               @db.Uuid
+  panel           panels?               @relation(fields: [panel_id], references: [uid])
+  schedule_id     String?               @db.Uuid
+  schedule        competition_schedule? @relation(fields: [schedule_id], references: [uid])
+  reviewed_by_id  String?               @db.Uuid
+  reviewed_by     competition_users?    @relation("competition_user_heat_reviewed_by", fields: [reviewed_by_id], references: [uid])
+  reviewed_at     DateTime?
+  checked_by_id   String?               @db.Uuid
+  checked_by      competition_users?    @relation("competition_user_heat_checked_by", fields: [checked_by_id], references: [uid])
+  checked_at      DateTime?
+  competitionLogs competition_log[]
+  heatMarks       heat_marks[]
+  heatResults     heat_result[]
 }

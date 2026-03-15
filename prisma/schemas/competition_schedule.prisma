@@ -9,4 +9,5 @@ model competition_schedule {
   start_time     DateTime?
   end_time       DateTime?
   venue          String?
+  heat           heat[]
 }

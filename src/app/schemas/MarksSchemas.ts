@@ -9,7 +9,7 @@ export const RoundMarkSchema =z.array(z.object({
         uid:z.string().min(8),
         number:z.number(),
         name:z.string(),
-        partner_name:z.string(),
+        partner_name:z.string().nullable().optional(),
     }))
 }))
 
@@ -24,7 +24,7 @@ export const FinalMarkSchema = z.array(z.object({
         uid: z.string().min(8),
         number: z.number(),
         name: z.string(),
-        partner_name: z.string(),
+        partner_name: z.string().nullable().optional(),
         mark: z.string().min(1),
     }))
 }))

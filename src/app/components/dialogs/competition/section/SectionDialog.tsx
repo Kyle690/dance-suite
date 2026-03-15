@@ -23,6 +23,7 @@ import SectionHeats from "@/app/components/dialogs/competition/section/_componen
 import MenuButtons, { MenuButtonsProps } from "@/app/components/layout/MenuButtons";
 import SectionDetailsDialog from "@/app/components/dialogs/competition/SectionDetailsDialog";
 import HeatDialog from "@/app/components/dialogs/competition/section/HeatDialog";
+import ImportDancersDialog from "@/app/components/dialogs/competition/section/_components/ImportDancersDialog";
 import { startCase, toLower } from "lodash";
 
 type SectionDialogProps = {}
@@ -79,7 +80,9 @@ const SectionDialog: React.FC<DialogProps<sections>> = ({
                     label:'Import Dancers',
                     icon:<ImportExport color={'secondary'}/>,
                     color:'secondary',
-                    onClick:()=>{}
+                    onClick: async () => {
+                        await dialogs.open(ImportDancersDialog, { section_id: payload.uid });
+                    }
                 }
             ]
         }

@@ -7,6 +7,64 @@ Project "DanceSuite" {
   Note: ''
 }
 
+Table adjudicator {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  name String [not null]
+  letter String [not null]
+  login_code String
+  token String
+  last_login DateTime
+  email String
+  competition_id String [not null]
+  is_deleted Boolean [not null, default: false]
+  deleted_at DateTime
+  deleted_by_id String
+}
+
+Table competition {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  name String [not null]
+  venue String
+  date DateTime
+  organizer_name String
+  organizer_email String
+  organization String
+  website String
+  is_deleted Boolean [not null, default: false]
+  deleted_at DateTime
+  deleted_by_id String
+  status CompetitionStatus [not null, default: 'DRAFT']
+}
+
+Table competition_log {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  competition_id String [not null]
+  user_id String
+  event_type CompetitionLogEventType [not null]
+  note String
+  data Json
+  heat_id String
+  dancer_id String
+  panel_id String
+  section_id String
+}
+
+Table competition_notes {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  competition_id String [not null]
+  user_id String [not null]
+  note String [not null]
+  attachmentUrls String[] [not null]
+}
+
 Table competition_schedule {
   uid String [pk]
   created DateTime [default: `now()`, not null]
@@ -17,6 +75,101 @@ Table competition_schedule {
   start_time DateTime
   end_time DateTime
   venue String
+}
+
+Table competition_users {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  competition_id String [not null]
+  user_id String [not null]
+  role CompetitionUserRole [not null, default: 'VIEWER']
+  is_deleted Boolean [not null, default: false]
+  deleted_at DateTime
+  is_active Boolean [not null, default: true]
+}
+
+Table dancers {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  number Int
+  name String
+  partner_name String
+  studio String
+  region String
+  country String
+  section_id String [not null]
+  meta_data Json
+  created_type DancerCreatedByType [not null, default: 'SCRUTINEER']
+  created_by_id String
+  updated_by_id String
+  deleted_by_id String
+  heatUid String
+}
+
+Table heat {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  section_id String [not null]
+  order Int
+  item_no String [not null]
+  status HeatStatus [not null, default: 'DRAFT']
+  type HeatType [not null, default: 'ROUND']
+  callback_limit Int
+  dances String[] [not null]
+  panel_id String
+  schedule_id String
+  reviewed_by_id String
+  reviewed_at DateTime
+  checked_by_id String
+  checked_at DateTime
+}
+
+Table heat_marks {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  heat_id String [not null]
+  adjudicator_id String [not null]
+  ip_address String
+  signature String
+  check_sum String
+  input_type HeatMarkInputType [not null, default: 'JUDGE']
+  scrutineer_id String
+}
+
+Table heat_result {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  heat_id String [not null]
+  section_id String [not null]
+  created_by_id String [not null]
+}
+
+Table heat_result_dancer {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  dancer_id String [not null]
+  heat_result_id String [not null]
+  no_callbacks Int [not null, default: 0]
+  callback Boolean [not null, default: false]
+  position Int
+}
+
+Table marks {
+  uid String [pk]
+  created DateTime [default: `now()`, not null]
+  updated DateTime [not null]
+  dancer_number Int [not null]
+  dancer_id String
+  heat_mark_id String [not null]
+  mark Int
+  percentage Int
+  dance String [not null]
 }
 
 Table panels {
@@ -51,77 +204,6 @@ Table section_result {
   position Int [not null]
 }
 
-Table heat_result {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  heat_id String [not null]
-  section_id String [not null]
-  created_by_id String [not null]
-}
-
-Table heat_result_dancer {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  dancer_id String [not null]
-  heat_result_id String [not null]
-  no_callbacks Int [not null, default: 0]
-  callback Boolean [not null, default: false]
-  position Int
-}
-
-Table heat_marks {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  heat_id String [not null]
-  adjudicator_id String [not null]
-  ip_address String
-  signature String
-  check_sum String
-  input_type HeatMarkInputType [not null, default: 'JUDGE']
-  scrutineer_id String
-}
-
-Table adjudicator {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  name String [not null]
-  letter String [not null]
-  login_code String
-  token String
-  last_login DateTime
-  email String
-  competition_id String [not null]
-  is_deleted Boolean [not null, default: false]
-  deleted_at DateTime
-  deleted_by_id String
-}
-
-Table user_license {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  user_id String [not null]
-  license_type LicenseType [not null, default: 'FREE']
-  expiration_date DateTime
-  stripe_invoice_id String
-}
-
-Table marks {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  dancer_number Int [not null]
-  dancer_id String
-  heat_mark_id String [not null]
-  mark Int
-  percentage Int
-  dance String [not null]
-}
-
 Table sections {
   uid String [pk]
   created DateTime [default: `now()`, not null]
@@ -136,107 +218,110 @@ Table sections {
   competitive_type CompetitiveType [not null, default: 'COMPETITIVE']
 }
 
-Table heat {
+Table user_license {
   uid String [pk]
   created DateTime [default: `now()`, not null]
   updated DateTime [not null]
-  section_id String [not null]
-  order Int
-  item_no String [not null]
-  status HeatStatus [not null, default: 'DRAFT']
-  type HeatType [not null, default: 'ROUND']
-  callback_limit Int
-  dances String[] [not null]
-  panel_id String
-  schedule_id String
-  reviewed_by_id String
-  reviewed_at DateTime
-  checked_by_id String
-  checked_at DateTime
+  user_id String [not null]
+  license_type LicenseType [not null, default: 'FREE']
+  expiration_date DateTime
+  stripe_invoice_id String
 }
 
-Table competition_log {
+Table users {
   uid String [pk]
   created DateTime [default: `now()`, not null]
   updated DateTime [not null]
-  competition_id String [not null]
-  user_id String
-  event_type CompetitionLogEventType [not null]
-  note String
-  data Json
-  heat_id String
-  dancer_id String
-  panel_id String
-  section_id String
-}
-
-Table competition {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  name String [not null]
-  venue String
-  date DateTime
-  organizer_name String
-  organizer_email String
-  organization String
-  website String
+  external_id String [unique]
+  stripe_customer_id String [unique]
+  user_types UserTypes[] [not null]
   is_deleted Boolean [not null, default: false]
   deleted_at DateTime
   deleted_by_id String
-  status CompetitionStatus [not null, default: 'DRAFT']
 }
 
-Table competition_users {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  competition_id String [not null]
-  user_id String [not null]
-  role CompetitionUserRole [not null, default: 'VIEWER']
-  is_deleted Boolean [not null, default: false]
-  deleted_at DateTime
-  is_active Boolean [not null, default: true]
+Enum CompetitionStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  ARCHIVED
 }
 
-Table competition_notes {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  competition_id String [not null]
-  user_id String [not null]
-  note String [not null]
-  attachmentUrls String[] [not null]
+Enum CompetitionLogEventType {
+  COMPETITION_CREATED
+  COMPETITION_STARTED
+  COMPETITION_COMPLETED
+  COMPETITION_ARCHIVED
+  SECTION_CREATED
+  SECTION_EDITED
+  SECTION_DELETED
+  DANCER_REGISTERED
+  DANCER_ADDED
+  DANCER_EDITED
+  DANCER_WITHDRAWN
+  HEAT_CREATED
+  HEAT_EDITED
+  HEAT_DELETED
+  HEAT_ACTIVE
+  HEAT_MARSHALLING
+  HEAT_READY
+  HEAT_JUDGING
+  HEAT_REVIEWING
+  HEAT_CHECKING
+  HEAT_COMPLETE
+  HEAT_CANCELED
+  HEAT_MARKS_ENTERED
+  HEAT_MARKS_SUBMITTED
+  COMPETITION_USER_CREATED
+  COMPETITION_USER_EDITED
+  COMPETITION_USER_DELETED
+  PANEL_CREATED
+  PANEL_EDITED
+  PANEL_DELETED
+  COMPETITION_NOTE_ADDED
+  COMPETITION_NOTE_EDITED
+  COMPETITION_NOTE_DELETED
+  SYSTEM_EVENT
 }
 
-Table dancers {
-  uid String [pk]
-  created DateTime [default: `now()`, not null]
-  updated DateTime [not null]
-  number Int
-  name String
-  partner_name String
-  studio String
-  region String
-  country String
-  section_id String [not null]
-  meta_data Json
-  created_type DancerCreatedByType [not null, default: 'SCRUTINEER']
-  created_by_id String
-  updated_by_id String
-  deleted_by_id String
-  heatUid String
+Enum CompetitionUserRole {
+  ADMIN
+  SCRUTINEER
+  JUDGE
+  OFFICIAL
+  VIEWER
+}
+
+Enum DancerCreatedByType {
+  SCRUTINEER
+  IMPORT
+  OFFICIAL
+}
+
+Enum HeatType {
+  ROUND
+  QUARTER_FINAL
+  SEMI_FINAL
+  FINAL
+  UNCONTESTED
+}
+
+Enum HeatStatus {
+  DRAFT
+  ACTIVE
+  MARSHALLING
+  READY
+  JUDGING
+  REVIEWING
+  CHECKING
+  COMPLETE
+  CANCELED
 }
 
 Enum HeatMarkInputType {
   JUDGE
   SCRUTINEER
-}
-
-Enum LicenseType {
-  FREE
-  PRO
-  ENTERPRISE
 }
 
 Enum CompetitiveType {
@@ -285,130 +370,22 @@ Enum SectionEntryType {
   GROUP
 }
 
-Enum HeatType {
-  ROUND
-  QUARTER_FINAL
-  SEMI_FINAL
-  FINAL
-  UNCONTESTED
+Enum LicenseType {
+  FREE
+  PRO
+  ENTERPRISE
 }
 
-Enum HeatStatus {
-  DRAFT
-  ACTIVE
-  MARSHALLING
-  READY
-  JUDGING
-  REVIEWING
-  CHECKING
-  COMPLETE
-  CANCELED
-}
-
-Enum CompetitionLogEventType {
-  COMPETITION_CREATED
-  COMPETITION_STARTED
-  COMPETITION_COMPLETED
-  COMPETITION_ARCHIVED
-  SECTION_CREATED
-  SECTION_EDITED
-  SECTION_DELETED
-  DANCER_REGISTERED
-  DANCER_ADDED
-  DANCER_EDITED
-  DANCER_WITHDRAWN
-  HEAT_CREATED
-  HEAT_EDITED
-  HEAT_DELETED
-  HEAT_ACTIVE
-  HEAT_MARSHALLING
-  HEAT_READY
-  HEAT_JUDGING
-  HEAT_REVIEWING
-  HEAT_CHECKING
-  HEAT_COMPLETE
-  HEAT_CANCELED
-  HEAT_MARKS_ENTERED
-  HEAT_MARKS_SUBMITTED
-  COMPETITION_USER_CREATED
-  COMPETITION_USER_EDITED
-  COMPETITION_USER_DELETED
-  PANEL_CREATED
-  PANEL_EDITED
-  PANEL_DELETED
-  COMPETITION_NOTE_ADDED
-  COMPETITION_NOTE_EDITED
-  COMPETITION_NOTE_DELETED
-  SYSTEM_EVENT
-}
-
-Enum CompetitionStatus {
-  DRAFT
-  ACTIVE
-  COMPLETED
-  CANCELLED
-  ARCHIVED
-}
-
-Enum CompetitionUserRole {
+Enum UserTypes {
   ADMIN
   SCRUTINEER
-  JUDGE
-  OFFICIAL
-  VIEWER
+  CHAIRPERSON
+  DANCER
+  ORGANIZER
+  LECTURERER
 }
-
-Enum DancerCreatedByType {
-  SCRUTINEER
-  IMPORT
-  OFFICIAL
-}
-
-Ref: competition_schedule.competition_id > competition.uid
-
-Ref: panels.competition_id > competition.uid
-
-Ref: panels_adjudicators.panel_id > panels.uid
-
-Ref: panels_adjudicators.adjudicator_id > adjudicator.uid
-
-Ref: section_result.section_id > sections.uid [delete: Cascade]
-
-Ref: section_result.dancer_id > dancers.uid
-
-Ref: heat_result.section_id > sections.uid [delete: Cascade]
-
-Ref: heat_result.heat_id > heat.uid
-
-Ref: heat_result.created_by_id > competition_users.uid
-
-Ref: heat_result_dancer.dancer_id > dancers.uid
-
-Ref: heat_result_dancer.heat_result_id > heat_result.uid [delete: Cascade]
-
-Ref: heat_marks.heat_id > heat.uid [delete: Cascade]
-
-Ref: heat_marks.adjudicator_id > adjudicator.uid
-
-Ref: heat_marks.scrutineer_id > competition_users.uid
 
 Ref: adjudicator.competition_id > competition.uid
-
-Ref: marks.dancer_id > dancers.uid [delete: Cascade]
-
-Ref: marks.heat_mark_id > heat_marks.uid [delete: Cascade]
-
-Ref: sections.competition_id > competition.uid
-
-Ref: heat.section_id > sections.uid [delete: Cascade]
-
-Ref: heat.panel_id > panels.uid
-
-Ref: heat.schedule_id > competition_schedule.uid
-
-Ref: heat.reviewed_by_id > competition_users.uid
-
-Ref: heat.checked_by_id > competition_users.uid
 
 Ref: competition_log.competition_id > competition.uid [delete: Cascade]
 
@@ -422,9 +399,11 @@ Ref: competition_log.panel_id > panels.uid
 
 Ref: competition_log.section_id > sections.uid
 
-Ref: competition_users.competition_id > competition.uid
-
 Ref: competition_notes.competition_id > competition.uid
+
+Ref: competition_schedule.competition_id > competition.uid
+
+Ref: competition_users.competition_id > competition.uid
 
 Ref: dancers.section_id > sections.uid [delete: Cascade]
 
@@ -435,3 +414,47 @@ Ref: dancers.updated_by_id > competition_users.uid
 Ref: dancers.deleted_by_id > competition_users.uid
 
 Ref: dancers.heatUid > heat.uid
+
+Ref: heat.section_id > sections.uid [delete: Cascade]
+
+Ref: heat.panel_id > panels.uid
+
+Ref: heat.schedule_id > competition_schedule.uid
+
+Ref: heat.reviewed_by_id > competition_users.uid
+
+Ref: heat.checked_by_id > competition_users.uid
+
+Ref: heat_marks.heat_id > heat.uid [delete: Cascade]
+
+Ref: heat_marks.adjudicator_id > adjudicator.uid
+
+Ref: heat_marks.scrutineer_id > competition_users.uid
+
+Ref: heat_result.section_id > sections.uid [delete: Cascade]
+
+Ref: heat_result.heat_id > heat.uid
+
+Ref: heat_result.created_by_id > competition_users.uid
+
+Ref: heat_result_dancer.dancer_id > dancers.uid
+
+Ref: heat_result_dancer.heat_result_id > heat_result.uid [delete: Cascade]
+
+Ref: marks.dancer_id > dancers.uid [delete: Cascade]
+
+Ref: marks.heat_mark_id > heat_marks.uid [delete: Cascade]
+
+Ref: panels.competition_id > competition.uid
+
+Ref: panels_adjudicators.panel_id > panels.uid
+
+Ref: panels_adjudicators.adjudicator_id > adjudicator.uid
+
+Ref: section_result.section_id > sections.uid [delete: Cascade]
+
+Ref: section_result.dancer_id > dancers.uid
+
+Ref: sections.competition_id > competition.uid
+
+Ref: user_license.user_id > users.uid
