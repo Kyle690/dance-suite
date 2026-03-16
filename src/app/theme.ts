@@ -1,4 +1,5 @@
-import { createTheme, alpha } from "@mui/material/styles";
+import { createTheme, alpha, Theme } from "@mui/material/styles";
+import type {} from '@mui/x-data-grid/themeAugmentation';
 
 /**
  * Application theme — luxury dance-suite aesthetic.
@@ -272,7 +273,7 @@ const theme = createTheme({
         },
         MuiDataGrid: {
             styleOverrides: {
-                root: ({ theme }) => ({
+                root: ({ theme }: { theme: Theme }) => ({
                     borderColor: theme.palette.divider,
                     '--DataGrid-rowBorderColor': theme.palette.divider,
                     '& .MuiDataGrid-cell': {

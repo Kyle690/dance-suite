@@ -3,6 +3,8 @@ import React, { useMemo } from 'react';
 import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem, SvgIconProps, ThemedProps, Button } from "@mui/material";
 import { MoreVert } from "@mui/icons-material";
 
+type MaterialColors = 'primary'|'secondary'|'error'|'warning'|'info'|'success';
+
 export type MenuButtonsProps = {
     name:string;
     id:string;
