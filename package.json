@@ -31,7 +31,7 @@
     "@toolpad/core": "^0.16.0",
     "dotenv": "^17.2.3",
     "lodash": "^4.17.21",
-    "next": "15.5.4",
+    "next": "15.5.9",
     "next-safe-action": "^8.0.10",
     "notistack": "^3.0.2",
     "papaparse": "^5.5.3",
