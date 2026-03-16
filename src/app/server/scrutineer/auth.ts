@@ -29,6 +29,7 @@ export const scrutineerSignUp = unsafeAction.inputSchema(SignUpSchema).action(as
 
         await prisma.users.create({
             data:{
+                uid:superbaseUser.data.user?.id,
                 external_id:superbaseUser.data.user?.id,
                 user_types:[ UserTypes.SCRUTINEER ]
             }
