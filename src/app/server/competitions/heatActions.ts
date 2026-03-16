@@ -111,11 +111,47 @@ export const updateHeatDancers = safeAction.inputSchema(SectionHeatStartListSche
 
 })
 
+export const getCompetitionHeats = safeAction.inputSchema(UidSchema).action(async({ parsedInput })=>{
+    return prisma.heat.findMany({
+        where:{
+            section:{
+                competition_id: parsedInput
+            }
+        },
+        orderBy:{
+            order:'asc'
+        },
+        include:{
+            start_list:true,
+            section:{
+                select:{
+                    name:true
+                }
+            },
+            heat_marks:true,
+            panel:{
+                include:{
+                    panels_adjudicators:{
+                        include:{
+                            adjudicator:{
+                                select:{
+                                    letter:true
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    })
+})
+
 export default {
     createHeat,
     updateHeat,
     deleteHeat,
     activateHeat,
     getHeatDancers,
-    updateHeatDancers
+    updateHeatDancers,
+    getCompetitionHeats,
 }

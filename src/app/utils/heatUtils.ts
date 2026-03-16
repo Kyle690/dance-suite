@@ -1,6 +1,23 @@
 import { HeatStatus, HeatType } from "@prisma/client";
-import { green, grey, amber, red, purple, lightBlue, deepPurple } from "@mui/material/colors";
+import { green, grey, amber, red, purple, lightBlue, deepPurple, teal, orange } from "@mui/material/colors";
 
+
+export const getHeatTypeColor = (type: HeatType) => {
+    switch (type) {
+    case HeatType.ROUND:
+        return lightBlue[400];
+    case HeatType.QUARTER_FINAL:
+        return teal[400];
+    case HeatType.SEMI_FINAL:
+        return orange[400];
+    case HeatType.FINAL:
+        return purple[500];
+    case HeatType.UNCONTESTED:
+        return grey[400];
+    default:
+        return grey[400];
+    }
+}
 
 export const getHeatStatusColor = (status:HeatStatus)=>{
     switch(status){

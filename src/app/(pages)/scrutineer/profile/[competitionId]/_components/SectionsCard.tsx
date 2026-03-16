@@ -153,6 +153,7 @@ const SectionsCard: React.FC<SectionsCardProps> = () => {
                     rows={data ||[]}
                     getRowId={(row)=>row.uid}
                     showToolbar
+                    disableColumnMenu
                     loading={isLoading}
                     sx={{
                         flex: 1,

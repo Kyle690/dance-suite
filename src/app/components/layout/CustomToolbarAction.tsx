@@ -36,6 +36,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
         <Stack
             direction={'row'}
             alignItems={'center'}
+            spacing={1}
         >
             <MenuButtons
                 name={'Competition'}

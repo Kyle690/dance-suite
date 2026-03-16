@@ -1,5 +1,4 @@
 'use client';
-
 import React, { useState } from 'react';
 import {
   IconButton,
@@ -55,21 +54,18 @@ export default function UserMenu() {
 
   return (
     <>
-      <IconButton
-        onClick={handleClick}
-        size="small"
-        aria-controls={open ? 'user-menu' : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? 'true' : undefined}
+      <Avatar
+          sx={{ width:30,height:30,  bgcolor: 'primary.main' }}
+          alt={userName}
+          onClick={handleClick}
+          aria-controls={open ? 'user-menu' : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? 'true' : undefined}
       >
-        <Avatar
-            sx={{ bgcolor: 'primary.main' }}
-            alt={userName}
-            sizes={'24px'}
-        >
+        <Typography>
           {initials}
-        </Avatar>
-      </IconButton>
+        </Typography>
+      </Avatar>
       <Menu
         anchorEl={anchorEl}
         id="user-menu"

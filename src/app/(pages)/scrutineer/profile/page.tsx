@@ -108,7 +108,10 @@ const Competitions = ()=>{
                 <Container
                     maxWidth={'lg'}
                     sx={{
-                        p:4,
+                        p:{
+                            xs:2,
+                            md:4,
+                        },
                         display:'flex',
                         flex:1,
                         flexDirection:'column',
