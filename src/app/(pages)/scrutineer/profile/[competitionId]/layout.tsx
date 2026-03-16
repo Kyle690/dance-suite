@@ -62,7 +62,7 @@ const Layout: React.FC<layoutProps> = ({
             navigation={NAVIGATION}
             branding={{
                 title:data?.data?.name ||BRANDING.title,
-                homeUrl:`/competitions/${competitionId}`
+                homeUrl:`/scrutineer/profile/${competitionId}`
             }}
             theme={theme}
         >

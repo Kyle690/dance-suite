@@ -12,6 +12,7 @@ import AdjudicatorsDialog from "@/app/components/dialogs/competition/Adjudicator
 import PanelsDialog from "@/app/components/dialogs/competition/PanelsDialog";
 import { useAdjudicators } from "@/app/hooks/useAdjudicators";
 import { useColorScheme } from "@mui/material/styles";
+import UserMenu from "@/app/components/UserMenu";
 
 type CustomToolbarActionProps = {
     competition?:competition
@@ -39,7 +40,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
             <MenuButtons
                 name={'Competition'}
                 id={'competition'}
-                menuName={'Details'}
+                menuName={'Competition'}
                 buttons={[
                     {
                         label:'Edit Details',
@@ -55,15 +56,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                         onClick:()=>{},
                         icon:<Delete color={'error'}/>,
                         color:'error',
-                    }
-                ]}
-
-            />
-            <MenuButtons
-                name={'Adjudicators'}
-                id={'competition'}
-                menuName={'Adjudicators'}
-                buttons={[
+                    },
                     {
                         label:'Adjudicators',
                         onClick:async()=>{
@@ -83,6 +76,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                 ]}
 
             />
+            <UserMenu />
             <Tooltip title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}>
                 <IconButton onClick={() => setMode(isDark ? 'light' : 'dark')}>
                     {isDark ? <LightMode /> : <DarkMode />}
@@ -90,7 +84,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
             </Tooltip>
             <Tooltip title={'Close Competition'}>
                 <IconButton
-                    onClick={()=>router.push('/competitions')}
+                    onClick={()=>router.push('/scrutineer/profile')}
                 >
                     <ExitToAppOutlined/>
                 </IconButton>

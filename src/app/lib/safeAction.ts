@@ -1,20 +1,22 @@
 import { createSafeActionClient } from "next-safe-action";
 import { redirect } from "next/navigation";
 import { headers } from 'next/headers';
+import { createClient } from '@/app/lib/supabase/server';
+import { prisma } from "@/app/lib/prisma";
 
 export const safeAction = createSafeActionClient({}).use(async({ next, clientInput, ctx })=>{
 
-    const user =  {
-        id: 'c4167ebc-2069-43ef-9635-e15edae90139',
-        emailAddresses:[ { emailAddress:'test@mail.com' } ],
-        fullName:'Test User',
-        firstName:'Test'
+    // Get the authenticated user from Supabase
+    const supabase = await createClient();
+    const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+
+    // If user is not present, redirect to sign-in
+    if(!supabaseUser){
+        // todo - check later which auth user is required
+        redirect('/scrutineer/auth');
     }
 
-    // If user is not present, redirect immediately (avoid throwing an error that's caught locally)
-    if(!user){
-        redirect('/');
-    }
+
 
     // Read the current request headers and try to derive the current path.
     // When server actions are invoked from the browser, the `Referer` header is usually present
@@ -31,7 +33,7 @@ export const safeAction = createSafeActionClient({}).use(async({ next, clientInp
         }
     }
 
-    const competitionIdFromPath = requestPath?.split('/')[2] || null;
+    const competitionIdFromPath = requestPath?.split('/')[3] || null; // Updated index for /scrutineer/competitions/[id]
 
     try {
         return await next({
@@ -42,14 +44,19 @@ export const safeAction = createSafeActionClient({}).use(async({ next, clientInp
                 path: requestPath,
                 competition_id: competitionIdFromPath,
                 user:{
-                    name: user.fullName || user.firstName || 'User',
-                    email: user.emailAddresses[0]?.emailAddress || null,
-                    id: user.id
+                    name: supabaseUser.user_metadata?.full_name ||
+                          `${supabaseUser.user_metadata?.first_name || ''} ${supabaseUser.user_metadata?.last_name || ''}`.trim() ||
+                          supabaseUser.email?.split('@')[0] || 'User',
+                    email: supabaseUser.email || null,
+                    id: supabaseUser.id
                 }
             }
         });
     } catch (error) {
         console.error('Error in safeAction middleware', error);
-        redirect('/');
+        redirect('/scrutineer/auth');
     }
 });
+
+
+export const unsafeAction = createSafeActionClient({})

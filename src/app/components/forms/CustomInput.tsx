@@ -1,9 +1,11 @@
-import React, { FocusEventHandler } from "react";
+import React, { FocusEventHandler, useState } from "react";
 import {
     Autocomplete,
     Checkbox,
     CheckboxProps,
     FormControlLabel,
+    IconButton,
+    InputAdornment,
     SelectProps,
     TextField,
     TextFieldProps
@@ -11,7 +13,7 @@ import {
 import CustomSelectInput,{ CustomSelectInputProps } from "./CustomSelectInput";
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers";
 import dayjs from "@/app/utils/dayjs";
-import { Search } from "@mui/icons-material";
+import { Search, Visibility, VisibilityOff } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { Dayjs } from "dayjs";
 
@@ -25,6 +27,7 @@ export type CustomInputProps =
   inputType?: 'text' | 'number' | 'email' | 'password' | 'select' | 'autocomplete' | 'date' | 'search' | 'textarea' | 'checkbox';
 }
 
+
 export type CustomInputValueType = string | number | boolean | Dayjs |string[];
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -33,6 +36,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
     ...rest
 }) => {
     const theme= useTheme();
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleDateChange = (date: Dayjs | null) => {
         const event = {
@@ -162,6 +166,32 @@ const CustomInput: React.FC<CustomInputProps> = ({
                     onChange={handleCheckboxChange}
                 />}
                 label={rest.label}
+            />
+        )
+    }
+
+    if(inputType === 'password'){
+        return (
+            <TextField
+                fullWidth
+                required={rest.required}
+                type={showPassword ? 'text' : 'password'}
+                error={rest.error}
+                helperText={rest.helperText}
+                InputProps={{
+                    endAdornment: (
+                        <InputAdornment position="end">
+                            <IconButton
+                                onClick={() => setShowPassword(prev => !prev)}
+                                edge="end"
+                                size="small"
+                            >
+                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                        </InputAdornment>
+                    )
+                }}
+                {...rest}
             />
         )
     }

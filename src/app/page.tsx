@@ -1,11 +1,11 @@
 'use client';
-import { Typography, Box, Button } from '@mui/material';
+import { Typography, Box, Button, Stack } from '@mui/material';
 import { useRouter } from "next/navigation";
 
 
 const Home=()=> {
 
-    const navigate = useRouter()
+    const navigate = useRouter();
 
     return (
         <Box
@@ -24,11 +24,13 @@ const Home=()=> {
             >
                 Your comprehensive dance competition management system
             </Typography>
+
             <Button
-                variant={'contained'}
-                onClick={()=>navigate.push('/competitions')}
+                onClick={()=>navigate.push('/scrutineer/profile')}
+                size={'small'}
+                variant="contained"
             >
-                Sign in
+                Scrutineer Sign in
             </Button>
         </Box>
     );

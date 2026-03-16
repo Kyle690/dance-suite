@@ -81,7 +81,7 @@ const CompetitionDetailsDialog: React.FC<DialogProps<CompetitionDetailsProps>> =
         onSuccess:(data)=>{
             if(data.data){
                 enqueueSnackbar(`Competition ${payload?'update':'created'} successfully`, { variant:'success' })
-                router.push(`/competitions/${data.data.uid}`)
+                router.push(`/scrutineer/profile/${data.data.uid}`)
                 onClose();
             }
         },

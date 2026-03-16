@@ -11,6 +11,9 @@ import CompetitionDetailsDialog from "@/app/components/dialogs/competition/Compe
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getCompetitions } from "@/app/server/competitions";
+import UserMenu from "@/app/components/UserMenu";
+import Footer from "@/app/components/layout/Footer";
+import Navbar from "@/app/components/layout/Navbar";
 
 const columns: GridColDef[] = [
     {
@@ -20,7 +23,7 @@ const columns: GridColDef[] = [
         renderCell:(params)=>(
             <Link
                 component={NextLink}
-                href={`/competitions/${params.id}`}
+                href={`/scrutineer/profile/${params.id}`}
             >
                 {params.value}
             </Link>
@@ -99,78 +102,84 @@ const Competitions = ()=>{
     })
 
     return (
-        <Container
-            maxWidth={'lg'}
-            sx={{
-                p:4,
-                display:'flex',
-                flex:1,
-                flexDirection:'column',
-                minHeight:'100vh'
-            }}
-        >
-            <Card
-                sx={{
-                    flex:1,
-                    display:'flex',
-                    flexDirection:'column',
-                }}
-            >
-                <CardHeader
-                    title={'Competitions'}
-                    subheader={'All competitions you have created or are managing'}
-                    action={(
-                        <Button
-                            startIcon={<AddCircle/>}
-                            variant={'contained'}
-                            size={'small'}
-                            onClick={()=>setOpenModal(true)}
-                        >
-                            Create New
-                        </Button>
-                    )}
-                />
-                <CardContent
+        <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <Navbar />
+            <Box component="main" sx={{ flex: 1, p: 3 }}>
+                <Container
+                    maxWidth={'lg'}
                     sx={{
+                        p:4,
                         display:'flex',
                         flex:1,
+                        flexDirection:'column',
+                        minHeight:'100vh'
                     }}
                 >
-                    <DataGrid
-                        rows={data}
-                        columns={columns}
-                        density={'compact'}
-                        getRowId={(row)=>row.uid}
-                        showToolbar
+                    <Card
                         sx={{
-                            backgroundColor:'background.paper',
-                            borderRadius:4,
-                            '& .MuiDataGrid-columnHeader': {
-                                backgroundColor: 'background.paper',
-                            },
-                            flex: 1,
-                            minHeight: 0,
+                            flex:1,
+                            display:'flex',
+                            flexDirection:'column',
                         }}
-                        slotProps={{
-                            toolbar: {
-                                showQuickFilter: true,
-                                csvOptions: { disableToolbarButton: true },
-                                printOptions: { disableToolbarButton: true },
-                            },
-                            loadingOverlay:{
-                                variant:'linear-progress',
-                                noRowsVariant:'skeleton'
-                            }
-                        }}
+                    >
+                        <CardHeader
+                            title={'Competitions'}
+                            subheader={'All competitions you have created or are managing'}
+                            action={(
+                                <Button
+                                    startIcon={<AddCircle/>}
+                                    variant={'contained'}
+                                    size={'small'}
+                                    onClick={()=>setOpenModal(true)}
+                                >
+                                    Create New
+                                </Button>
+                            )}
+                        />
+                        <CardContent
+                            sx={{
+                                display:'flex',
+                                flex:1,
+                            }}
+                        >
+                            <DataGrid
+                                rows={data}
+                                columns={columns}
+                                density={'compact'}
+                                getRowId={(row)=>row.uid}
+                                showToolbar
+                                sx={{
+                                    backgroundColor:'background.paper',
+                                    borderRadius:4,
+                                    '& .MuiDataGrid-columnHeader': {
+                                        backgroundColor: 'background.paper',
+                                    },
+                                    flex: 1,
+                                    minHeight: 0,
+                                }}
+                                slotProps={{
+                                    toolbar: {
+                                        showQuickFilter: true,
+                                        csvOptions: { disableToolbarButton: true },
+                                        printOptions: { disableToolbarButton: true },
+                                    },
+                                    loadingOverlay:{
+                                        variant:'linear-progress',
+                                        noRowsVariant:'skeleton'
+                                    }
+                                }}
+                            />
+                        </CardContent>
+                    </Card>
+                    <CompetitionDetailsDialog
+                        payload={undefined}
+                        open={openModal}
+                        onClose={async()=>setOpenModal(false)}
                     />
-                </CardContent>
-            </Card>
-            <CompetitionDetailsDialog
-                payload={undefined}
-                open={openModal}
-                onClose={async()=>setOpenModal(false)}
-            />
-        </Container>
+                </Container>
+            </Box>
+            <Footer />
+        </Box>
     )
 }
 

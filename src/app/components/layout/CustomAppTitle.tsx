@@ -3,6 +3,7 @@ import { competition, CompetitionStatus } from "@prisma/client";
 import { Typography, Stack, Chip } from "@mui/material";
 import dayjs from "@/app/utils/dayjs";
 import { startCase, toLower } from "lodash";
+import { EmojiEvents } from "@mui/icons-material";
 
 type CustomAppTitleProps = {
     competition?:competition
@@ -33,6 +34,21 @@ const CustomAppTitle: React.FC<CustomAppTitleProps> = ({
             alignItems={'center'}
         >
             <Stack
+                direction={'row'}
+                alignItems={'center'}
+                spacing={1}
+                mr={2}
+            >
+                <EmojiEvents sx={{ color: 'secondary.main', fontSize: 22 }} />
+                <Typography
+                    variant="h6"
+                    fontWeight={600}
+                    sx={{ whiteSpace: 'nowrap' }}
+                >
+                    Dance Suite
+                </Typography>
+            </Stack>
+            <Stack
                 spacing={-0.5}
             >
                 <Typography
@@ -42,22 +58,22 @@ const CustomAppTitle: React.FC<CustomAppTitleProps> = ({
                 >
                     {competition?.name || 'Dance Suite Scrutineer'}
                 </Typography>
-                <Stack
-                    direction={'row'}
-                    alignItems={'center'}
-                    spacing={2}
-                >
-                    {competition?.venue && (
-                        <Typography variant={'caption'}>
-                            {competition.venue}
-                        </Typography>
-                    )}
-                    {competition?.date && (
-                        <Typography variant={'caption'}>
-                            {dayjs(competition.date).format('DD/MM/YYYY')}
-                        </Typography>
-                    )}
-                </Stack>
+                {/*<Stack*/}
+                {/*    direction={'row'}*/}
+                {/*    alignItems={'center'}*/}
+                {/*    spacing={2}*/}
+                {/*>*/}
+                {/*    {competition?.venue && (*/}
+                {/*        <Typography variant={'caption'}>*/}
+                {/*            {competition.venue}*/}
+                {/*        </Typography>*/}
+                {/*    )}*/}
+                {/*    {competition?.date && (*/}
+                {/*        <Typography variant={'caption'}>*/}
+                {/*            {dayjs(competition.date).format('DD/MM/YYYY')}*/}
+                {/*        </Typography>*/}
+                {/*    )}*/}
+                {/*</Stack>*/}
             </Stack>
             {competition?.status && (
                 <Chip

@@ -3,7 +3,7 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import App from "@/app/components/App";
 
 export const metadata: Metadata = {
-    title: "Dance Suite Scrutineer",
+    title: "Dance Suite",
     description: "A comprehensive dance competition management system",
 };
 
