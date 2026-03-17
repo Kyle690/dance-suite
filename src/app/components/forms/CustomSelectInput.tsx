@@ -2,6 +2,12 @@ import React from "react";
 
 import { FormControl, FormHelperText, InputLabel, MenuItem, Select, SelectProps } from "@mui/material";
 
+export type OptionType = {
+    label:string;
+    value:string;
+    disabled?:boolean;
+}
+
 export type CustomSelectInputProps = SelectProps &{
   options?:OptionType[],
   label?:string,
