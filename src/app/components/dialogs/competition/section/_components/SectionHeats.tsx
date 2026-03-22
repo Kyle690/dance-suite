@@ -1,7 +1,7 @@
 import React from 'react';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteHeat, getSectionHeats } from "@/app/server/competitions";
-import { Box, Chip, IconButton, lighten, darken, Stack } from '@mui/material'
+import { Box, Chip, IconButton, Stack } from '@mui/material'
 import { DataGrid } from "@mui/x-data-grid";
 import { useDialogs } from "@toolpad/core";
 import { orderBy, startCase, toLower }from 'lodash';
@@ -102,10 +102,7 @@ const SectionHeats: React.FC<SectionHeatsProps> = ({
                                 <Chip
                                     size={'small'}
                                     label={startCase(toLower(params?.row?.status))}
-                                    sx={{
-                                        backgroundColor:lighten(getHeatStatusColor(params.row.status), 0.7),
-                                        color:darken(getHeatStatusColor(params.row.status), 0.1),
-                                    }}
+                                    color={getHeatStatusColor(params.row.status)}
                                 />
                             )
                         }

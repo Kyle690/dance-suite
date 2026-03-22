@@ -11,6 +11,8 @@ import { deleteSection, getCompetitionSections } from "@/app/server/competitions
 import { DataGrid } from "@mui/x-data-grid";
 import SectionDialog from "@/app/components/dialogs/competition/section/SectionDialog";
 import { startCase, toLower } from "lodash";
+import { Chip } from "@mui/material";
+import { getEntryTypeColor, getCompetitiveTypeColor } from "@/app/utils/heatUtils";
 
 
 type SectionsCardProps = {}
@@ -96,11 +98,25 @@ const SectionsCard: React.FC<SectionsCardProps> = () => {
                             field:'entry_type',
                             headerName:'Entry Type',
                             flex:1,
+                            renderCell:(params)=> params.value ? (
+                                <Chip
+                                    label={startCase(toLower(params.value))}
+                                    size="small"
+                                    color={getEntryTypeColor(params.value)}
+                                />
+                            ) : null,
                         },
                         {
                             field:'competitive_type',
                             headerName:'Competitive Type',
-                            flex:1
+                            flex:1,
+                            renderCell:(params)=> params.value ? (
+                                <Chip
+                                    label={startCase(toLower(params.value.replace('_', ' ')))}
+                                    size="small"
+                                    color={getCompetitiveTypeColor(params.value)}
+                                />
+                            ) : null,
                         },
                         {
                             field:'Actions',

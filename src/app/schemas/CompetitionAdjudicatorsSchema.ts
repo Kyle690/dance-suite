@@ -14,3 +14,13 @@ export const CompetitionAdjudicatorsSchema = z.object({
 })
 
 export type CompetitionAdjudicatorsType = z.infer<typeof CompetitionAdjudicatorsSchema>;
+
+export const AdjudicatorContactSchema = z.object({
+    uid: z.string(),
+    email: z.string().email('Invalid email').optional().or(z.literal('')),
+    phone_number: z.string().optional().or(z.literal('')),
+    country_code: z.string().optional(),
+    country_calling_code: z.string().optional(),
+});
+
+export type AdjudicatorContactType = z.infer<typeof AdjudicatorContactSchema>;

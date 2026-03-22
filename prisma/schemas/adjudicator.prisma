@@ -1,18 +1,23 @@
 model adjudicator {
-  uid                String                @id @unique @default(uuid()) @db.Uuid
-  created            DateTime              @default(now())
-  updated            DateTime              @updatedAt
-  name               String
-  letter             String
-  login_code         String?
-  token              String?
-  last_login         DateTime?
-  email              String?
-  competition_id     String                @db.Uuid
-  competition        competition           @relation(fields: [competition_id], references: [uid])
-  is_deleted         Boolean               @default(false)
-  deleted_at         DateTime?
-  deleted_by_id      String?               @db.Uuid
-  heat_marks          heat_marks[]
-  panels_adjudicators panels_adjudicators[]
+  uid                  String                @id @unique @default(uuid()) @db.Uuid
+  created              DateTime              @default(now())
+  updated              DateTime              @updatedAt
+  name                 String
+  letter               String
+  login_code           String?
+  token                String?
+  salt                 String?
+  last_login           DateTime?
+  email                String?
+  phone_number         String?
+  country_code         String?
+  country_calling_code String?
+  competition_id       String                @db.Uuid
+  competition          competition           @relation(fields: [competition_id], references: [uid])
+  is_deleted           Boolean               @default(false)
+  deleted_at           DateTime?
+  deleted_by_id        String?               @db.Uuid
+  heat_marks           heat_marks[]
+  panels_adjudicators  panels_adjudicators[]
+  adjudicator_logs     adjudicator_log[]
 }

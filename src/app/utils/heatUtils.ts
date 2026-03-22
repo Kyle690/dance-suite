@@ -1,43 +1,74 @@
-import { HeatStatus, HeatType } from "@prisma/client";
-import { green, grey, amber, red, purple, lightBlue, deepPurple, teal, orange } from "@mui/material/colors";
+import { CompetitiveType, HeatStatus, HeatType, SectionEntryType } from "@prisma/client";
+import { ChipProps } from "@mui/material";
 
+type ChipColor = ChipProps['color'];
 
-export const getHeatTypeColor = (type: HeatType) => {
+export const getHeatTypeColor = (type: HeatType): ChipColor => {
     switch (type) {
     case HeatType.ROUND:
-        return lightBlue[400];
+        return 'info';
     case HeatType.QUARTER_FINAL:
-        return teal[400];
+        return 'secondary';
     case HeatType.SEMI_FINAL:
-        return orange[400];
+        return 'warning';
     case HeatType.FINAL:
-        return purple[500];
+        return 'primary';
     case HeatType.UNCONTESTED:
-        return grey[400];
+        return 'default';
     default:
-        return grey[400];
+        return 'default';
     }
-}
+};
 
-export const getHeatStatusColor = (status:HeatStatus)=>{
-    switch(status){
+export const getHeatStatusColor = (status: HeatStatus): ChipColor => {
+    switch (status) {
     case HeatStatus.DRAFT:
-        return grey[300]
+        return 'default';
     case HeatStatus.ACTIVE:
-        return lightBlue[300]
+        return 'info';
     case HeatStatus.MARSHALLING:
-        return amber[300];
+        return 'warning';
     case HeatStatus.READY:
-        return purple[300];
-    case HeatStatus.CANCELED:
-        return red[300];
-    case HeatStatus.CHECKING:
-        return amber[600];
+        return 'secondary';
     case HeatStatus.JUDGING:
-        return deepPurple[300];
+        return 'primary';
+    case HeatStatus.REVIEWING:
+        return 'warning';
+    case HeatStatus.CHECKING:
+        return 'warning';
     case HeatStatus.COMPLETE:
-        return green[800];
+        return 'success';
+    case HeatStatus.CANCELED:
+        return 'error';
     default:
-        return grey[300];
+        return 'default';
     }
-}
+};
+
+export const getEntryTypeColor = (type: SectionEntryType): ChipColor => {
+    switch (type) {
+    case SectionEntryType.SOLO:
+        return 'info';
+    case SectionEntryType.DUO:
+        return 'secondary';
+    case SectionEntryType.COUPLE:
+        return 'primary';
+    case SectionEntryType.GROUP:
+        return 'success';
+    default:
+        return 'default';
+    }
+};
+
+export const getCompetitiveTypeColor = (type: CompetitiveType): ChipColor => {
+    switch (type) {
+    case CompetitiveType.COMPETITIVE:
+        return 'primary';
+    case CompetitiveType.SOCIAL:
+        return 'success';
+    case CompetitiveType.MIXED_COMPETITIVE:
+        return 'warning';
+    default:
+        return 'default';
+    }
+};

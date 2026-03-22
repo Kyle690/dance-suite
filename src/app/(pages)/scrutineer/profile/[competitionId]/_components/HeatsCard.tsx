@@ -3,7 +3,7 @@
 import React from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { getCompetitionHeats } from "@/app/server/competitions";
-import { Card, CardContent, Chip, Stack, darken, lighten } from '@mui/material';
+import { Card, CardContent, Chip, Stack } from '@mui/material';
 import { DataGrid } from "@mui/x-data-grid";
 import { orderBy, startCase, toLower } from 'lodash';
 import { getHeatStatusColor, getHeatTypeColor } from "@/app/utils/heatUtils";
@@ -64,10 +64,7 @@ const HeatsCard = () => {
                                 <Chip
                                     size="small"
                                     label={startCase(toLower(params.row.type))}
-                                    sx={{
-                                        backgroundColor: lighten(getHeatTypeColor(params.row.type), 0.7),
-                                        color: darken(getHeatTypeColor(params.row.type), 0.1),
-                                    }}
+                                    color={getHeatTypeColor(params.row.type)}
                                 />
                             ),
                         },
@@ -122,10 +119,7 @@ const HeatsCard = () => {
                                 <Chip
                                     size="small"
                                     label={startCase(toLower(params?.row?.status))}
-                                    sx={{
-                                        backgroundColor: lighten(getHeatStatusColor(params.row.status), 0.7),
-                                        color: darken(getHeatStatusColor(params.row.status), 0.1),
-                                    }}
+                                    color={getHeatStatusColor(params.row.status)}
                                 />
                             ),
                         },

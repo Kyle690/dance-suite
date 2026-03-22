@@ -87,10 +87,27 @@ export const getCompetitionUser = safeAction.inputSchema(CompetitionUserRequestS
         }
     })
 })
+
+export const updateCompetitionStatus = safeAction.inputSchema(z.string()).action(async({ parsedInput })=>{
+    const current = await prisma.competition.findUnique({
+        where:{ uid: parsedInput },
+        select:{ status: true }
+    })
+
+    if(!current) throw new Error('Competition not found');
+
+    const newStatus = current.status === 'ACTIVE' ? 'DRAFT' : 'ACTIVE';
+
+    return prisma.competition.update({
+        where:{ uid: parsedInput },
+        data:{ status: newStatus }
+    })
+})
 export default {
     createCompetition,
     getCompetitions,
     getCompetition,
     updateCompetition,
-    getCompetitionUser
+    getCompetitionUser,
+    updateCompetitionStatus,
 }

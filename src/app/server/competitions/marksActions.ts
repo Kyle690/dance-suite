@@ -596,10 +596,8 @@ export const approveHeatResult = safeAction.inputSchema(UidSchema).action(async 
         competitionId: String(ctx.competition_id),
     });
 
-    return prisma.heat.update({
-        where: {
-            uid: parsedInput,
-        },
+    const completedHeat = await prisma.heat.update({
+        where: { uid: parsedInput },
         data: {
             status: HeatStatus.COMPLETE,
             checked_at: new Date(),
@@ -617,8 +615,49 @@ export const approveHeatResult = safeAction.inputSchema(UidSchema).action(async 
             uid: true,
             status: true,
             checked_at: true,
+            section_id: true,
+            type: true,
+            order: true,
+            item_no: true,
         },
     });
+
+    // Activate the next heat in sequence within the same section (non-FINAL heats only)
+    if (completedHeat.type !== 'FINAL') {
+        const nextHeat = await prisma.heat.findFirst({
+            where: {
+                section_id: completedHeat.section_id,
+                uid: { not: completedHeat.uid },
+                status: HeatStatus.DRAFT,
+                ...(completedHeat.order != null
+                    ? { order: { gt: completedHeat.order } }
+                    : { item_no: { gt: completedHeat.item_no } }
+                ),
+            },
+            orderBy: completedHeat.order != null
+                ? { order: 'asc' }
+                : { item_no: 'asc' },
+        });
+
+        if (nextHeat) {
+            await prisma.heat.update({
+                where: { uid: nextHeat.uid },
+                data: {
+                    status: HeatStatus.ACTIVE,
+                    competition_log: {
+                        create: {
+                            event_type: CompetitionLogEventType.HEAT_ACTIVE,
+                            competition_id: String(ctx.competition_id),
+                            user_id: String(competitionUser?.data?.uid),
+                            note: `Heat auto-activated after previous heat completed`,
+                        },
+                    },
+                },
+            });
+        }
+    }
+
+    return { uid: completedHeat.uid, status: completedHeat.status, checked_at: completedHeat.checked_at };
 });
 
 

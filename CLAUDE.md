@@ -6,12 +6,13 @@ A dance competition management and scrutineering system built with Next.js 15, M
 
 - **Next.js 15** with App Router and Turbopack
 - **TypeScript**
-- **Material UI v7** + MUI X DataGrid + MUI Toolpad Core
-- **Prisma** with `@prisma/adapter-pg` (direct `pg` connection, not Prisma's default connection pooling)
+- **Material UI v7** + MUI X DataGrid + MUI Toolpad Core (`@toolpad/core`)
+- **Prisma v7** with `@prisma/adapter-pg` (direct `pg` connection — no Prisma connection pooling)
 - **Supabase** for auth (SSR client via `@supabase/ssr`)
 - **next-safe-action** for type-safe server actions
 - **TanStack React Query** for client-side data fetching
 - **Zod v4** for schema validation
+- **react-hook-form** + `@hookform/resolvers` for forms
 - **@react-pdf/renderer** for PDF generation
 - **notistack** for toast notifications
 - **papaparse** for CSV import
@@ -20,91 +21,157 @@ A dance competition management and scrutineering system built with Next.js 15, M
 ## Commands
 
 ```bash
-npm run dev          # Start dev server (Turbopack)
-npm run build        # Production build
-npm run lint         # ESLint
+npm run dev                # Start dev server (Turbopack)
+npm run build              # prisma generate && next build (used by Vercel)
+npm run lint               # ESLint
 npm run database:generate  # Regenerate Prisma client
 npm run database:push      # Push schema to DB
 npm run database:studio    # Open Prisma Studio
 ```
 
-## Project Structure
+## Routing Structure
+
+```
+/                                          # Home page (sign in / view competitions)
+/scrutineer/                               # AuthProvider wrapper layout
+/scrutineer/auth/                          # Auth page (ScrutineerSignIn / ScrutineerSignup)
+/scrutineer/profile/                       # Competitions list (Navbar + Footer)
+/scrutineer/profile/[competitionId]/       # Competition detail (Toolpad DashboardLayout)
+```
+
+## File Structure
 
 ```
 src/
 ├── app/
-│   ├── (auth)/                  # Auth pages (sign-in, sign-up)
-│   ├── (pages)/
-│   │   └── scrutineer/
-│   │       └── competitions/
-│   │           ├── page.tsx                    # Competitions list
-│   │           └── [competitionId]/
-│   │               ├── layout.tsx
-│   │               ├── page.tsx
-│   │               └── _components/            # Page-local components
+│   ├── (pages)/scrutineer/
+│   │   ├── layout.tsx                         # Wraps all scrutineer pages in AuthProvider
+│   │   ├── auth/                              # Auth page
+│   │   ├── profile/
+│   │   │   ├── page.tsx                       # Competitions list (DataGrid + Navbar + Footer)
+│   │   │   └── [competitionId]/
+│   │   │       ├── layout.tsx                 # Toolpad DashboardLayout with competition title
+│   │   │       ├── page.tsx                   # Tabs: Sections | Heats
+│   │   │       └── _components/
+│   │   │           ├── SectionsCard.tsx        # Sections DataGrid
+│   │   │           └── HeatsCard.tsx          # Heats DataGrid (all heats for competition)
 │   ├── components/
-│   │   ├── dialogs/competition/
-│   │   │   └── section/                        # Heat/section dialogs
-│   │   ├── forms/                              # Reusable form inputs
-│   │   ├── layout/                             # App shell components
-│   │   └── pdf/                                # PDF document components
-│   ├── contexts/                               # React contexts (AuthContext)
-│   ├── hooks/                                  # TanStack Query hooks
+│   │   ├── dialogs/competition/               # Competition-level dialogs
+│   │   │   └── section/                       # Heat & section dialogs
+│   │   │       └── _components/               # Sub-components (SectionHeats, SectionHeatRowButtons, etc.)
+│   │   ├── forms/
+│   │   │   ├── CustomInput.tsx                # Unified input (text/email/password/select/date/etc.)
+│   │   │   └── CustomSelectInput.tsx
+│   │   ├── layout/
+│   │   │   ├── Navbar.tsx                     # Sticky AppBar with brand + ThemeToggleButton + UserMenu
+│   │   │   ├── Footer.tsx                     # Copyright footer with current year
+│   │   │   ├── ThemeToggleButton.tsx          # Light/dark toggle via useColorScheme
+│   │   │   ├── MenuButtons.tsx                # Icon/text button that opens a dropdown Menu
+│   │   │   ├── CustomAppTitle.tsx             # Toolpad app title slot (shows competition name/status)
+│   │   │   └── CustomToolbarAction.tsx        # Toolpad toolbar actions slot
+│   │   ├── pdf/                               # @react-pdf/renderer documents
+│   │   └── UserMenu.tsx                       # Avatar dropdown (profile, sign out)
+│   ├── contexts/
+│   │   └── AuthContext.tsx                    # Supabase user context (user, loading, signOut)
+│   ├── hooks/
+│   │   ├── useAdjudicators.ts
+│   │   └── usePanels.ts
 │   ├── lib/
-│   │   ├── safeAction.ts                       # next-safe-action client with Supabase auth middleware
-│   │   ├── skating.ts                          # Skating system algorithm
-│   │   └── supabase/                           # Supabase client helpers (server, client, middleware)
-│   ├── schemas/                                # Zod schemas for forms/actions
-│   ├── server/competitions/                    # Server actions
-│   ├── types/                                  # Global TypeScript types
-│   └── utils/                                  # Utility functions
-├── middleware.ts                               # Supabase session refresh middleware
-└── prisma/
-    └── schema.prisma
+│   │   ├── prisma.ts                          # PrismaClient singleton (server-only)
+│   │   ├── safeAction.ts                      # next-safe-action client with Supabase auth middleware
+│   │   ├── skating.ts                         # Skating system algorithm
+│   │   └── supabase/                          # client.ts | server.ts | middleware.ts
+│   ├── schemas/
+│   │   ├── AuthSchema.ts                      # SignInSchema, SignUpSchema (Zod)
+│   │   ├── CommonSchema.ts
+│   │   ├── CompetitionAdjudicatorsSchema.ts
+│   │   ├── CompetitionDetailsForm.ts
+│   │   ├── MarksSchemas.ts
+│   │   ├── PanelSchema.ts
+│   │   └── SectionSchema.ts
+│   ├── server/competitions/                   # All competition server actions
+│   │   ├── index.ts                           # Re-exports everything
+│   │   ├── competitionActions.ts
+│   │   ├── sectionActions.ts
+│   │   ├── heatActions.ts
+│   │   ├── marksActions.ts
+│   │   ├── adjudicatorActions.ts
+│   │   ├── panelActions.ts
+│   │   ├── dancerActions.ts
+│   │   └── pdfActions.ts
+│   ├── server/scrutineer/                     # Scrutineer-specific actions (auth)
+│   ├── utils/
+│   │   ├── heatUtils.ts                       # getHeatStatusColor, getHeatTypeColor
+│   │   └── dayjs.ts
+│   ├── constants/dances.ts
+│   ├── theme.ts                               # MUI v7 CSS vars theme (light + dark)
+│   ├── layout.tsx                             # Root layout (AppRouterCacheProvider + App)
+│   └── page.tsx                               # Home page
+└── middleware.ts                              # Supabase session refresh
 ```
 
 ## Key Patterns
 
 ### Server Actions
-All mutations use `next-safe-action`. The `safeAction` client in `src/app/lib/safeAction.ts` automatically:
+All mutations use `next-safe-action`. The `safeAction` client in `src/app/lib/safeAction.ts`:
 - Validates Supabase auth; redirects to `/auth/sign-in` if unauthenticated
-- Injects `ctx.user`, `ctx.path`, and `ctx.competition_id` (parsed from referer URL at index `[3]` for `/scrutineer/competitions/[id]`)
+- Injects `ctx.user`, `ctx.path`, `ctx.competition_id` (parsed from referer at path index `[3]`)
 
-Example usage:
 ```ts
 export const myAction = safeAction
-  .schema(MySchema)
+  .inputSchema(MySchema)
   .action(async ({ parsedInput, ctx }) => {
     const { competition_id, user } = ctx;
-    // ...
   });
 ```
 
-### Data Fetching
-Client components fetch via TanStack Query hooks in `src/app/hooks/`. Hooks call server actions or API routes and cache results.
+### Forms
+All forms use **react-hook-form** + `zodResolver` + `Controller` wrapping `CustomInput`. Follow the pattern in `CompetitionDetailsDialog.tsx`:
+```tsx
+<Controller
+  name="fieldName"
+  control={control}
+  render={({ field }) => (
+    <CustomInput
+      {...field}
+      value={field.value as any}
+      inputType="text"
+      error={!!errors.fieldName}
+      helperText={errors.fieldName?.message}
+      variant="outlined"
+    />
+  )}
+/>
+```
+Note: cast `value={field.value as any}` and `onChange={handler as any}` to work around the `CustomInputProps` intersection type.
 
-### Auth
-- Supabase SSR auth via `@supabase/ssr`
-- Middleware in `src/middleware.ts` refreshes sessions on every request
-- `AuthContext` provides `user` and `loading` to client components
-- Protected routes redirect to `/auth/sign-in`
+### CustomInput inputTypes
+`text` | `email` | `password` (with show/hide toggle) | `number` | `select` | `autocomplete` | `date` | `search` | `textarea` | `checkbox`
 
-### Routing
-- Auth routes: `/auth/sign-in`, `/auth/sign-up`
-- App routes: `/scrutineer/competitions`, `/scrutineer/competitions/[competitionId]`
+### Theme
+MUI v7 CSS variables theme in `theme.ts` with `colorSchemes: { light, dark }`. Toggle via `useColorScheme()` from `@mui/material/styles`. The `colorSchemeSelector` is `data-toolpad-color-scheme`.
 
-### PDF Generation
-`@react-pdf/renderer` documents in `src/app/components/pdf/`. Server actions in `src/app/server/competitions/pdfActions.ts` handle generation.
+### Prisma
+- Client is in `src/app/lib/prisma.ts` — guarded with `import "server-only"`
+- Uses `PrismaPg` adapter with direct `pg` connection string
+- `serverExternalPackages: ['@prisma/client', '@prisma/adapter-pg', 'pg']` in `next.config.ts`
 
-### Skating System
-The skating algorithm is implemented in `src/app/lib/skating.ts`.
+### ESLint
+- `indent` rule is **off** (caused stack overflow crashes on complex JSX in Vercel builds)
+- `react/jsx-indent` and `react/jsx-indent-props` are set to 4 spaces
 
 ## Domain Concepts
 
-- **Competition**: Top-level event
-- **Section**: A division within a competition (e.g., "Novice Latin")
-- **Heat**: A round within a section (preliminary, semi-final, final)
-- **Adjudicator**: Judge assigned to a panel
-- **Panel**: Group of adjudicators for a section
-- **Dancer**: Competitor in a section
-- **Marks**: Scores/callbacks given by adjudicators per heat
+| Term | Description |
+|---|---|
+| Competition | Top-level event |
+| Section | Division within a competition (e.g. "Novice Latin") |
+| Heat | A round within a section (ROUND, QUARTER_FINAL, SEMI_FINAL, FINAL, UNCONTESTED) |
+| Adjudicator | Judge assigned to a panel |
+| Panel | Group of adjudicators for a section |
+| Dancer | Competitor registered in a section |
+| Marks | Scores/callbacks submitted by adjudicators per heat |
+| Start List | The set of dancers competing in a specific heat |
+
+## Heat Status Flow
+`DRAFT` → `ACTIVE` → `MARSHALLING` → `READY` → `JUDGING` → `REVIEWING` → `CHECKING` → `COMPLETE`

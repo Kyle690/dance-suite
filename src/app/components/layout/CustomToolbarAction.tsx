@@ -1,9 +1,9 @@
 import React from 'react';
 import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { getCompetition } from "@/app/server/competitions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getCompetition, updateCompetitionStatus } from "@/app/server/competitions";
 import { IconButton, Stack, Tooltip } from "@mui/material";
-import { ExitToAppOutlined, Edit, Delete, People, FormatListNumberedRtl, DarkMode, LightMode } from '@mui/icons-material'
+import { ExitToAppOutlined, Edit, Delete, People, FormatListNumberedRtl, DarkMode, LightMode, PlayCircleOutline, PauseCircleOutline } from '@mui/icons-material'
 import MenuButtons from "@/app/components/layout/MenuButtons";
 import { competition } from "@prisma/client";
 import { useDialogs } from "@toolpad/core";
@@ -13,6 +13,7 @@ import PanelsDialog from "@/app/components/dialogs/competition/PanelsDialog";
 import { useAdjudicators } from "@/app/hooks/useAdjudicators";
 import { useColorScheme } from "@mui/material/styles";
 import UserMenu from "@/app/components/UserMenu";
+import { useSnackbar } from "notistack";
 
 type CustomToolbarActionProps = {
     competition?:competition
@@ -26,11 +27,33 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
     const dialogs = useDialogs();
     const { mode, setMode } = useColorScheme();
     const isDark = mode === 'dark';
+    const { enqueueSnackbar } = useSnackbar();
+    const queryClient = useQueryClient();
 
     const {
         data:adjudicators,
         isLoading:adjudicatorsLoading
     }=useAdjudicators(String(competition?.uid))
+
+    const isActive = competition?.status === 'ACTIVE';
+
+    const { mutate: toggleStatus, isPending: isTogglingStatus } = useMutation({
+        mutationKey: ['update-competition-status', competition?.uid],
+        mutationFn: () => updateCompetitionStatus(competition!.uid),
+        onSuccess: async (data) => {
+            if (data?.data) {
+                const newStatus = data.data.status;
+                enqueueSnackbar(
+                    newStatus === 'ACTIVE' ? 'Competition activated' : 'Competition set to draft',
+                    { variant: 'success' }
+                );
+                await queryClient.invalidateQueries({ queryKey: ['getCompetition', competition?.uid] });
+            }
+        },
+        onError: () => {
+            enqueueSnackbar('Failed to update competition status', { variant: 'error' });
+        },
+    });
 
     return (
         <Stack
@@ -43,6 +66,15 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                 id={'competition'}
                 menuName={'Competition'}
                 buttons={[
+                    {
+                        label: isActive ? 'Set to Draft' : 'Activate Competition',
+                        onClick: () => toggleStatus(),
+                        icon: isActive
+                            ? <PauseCircleOutline color={'warning'} />
+                            : <PlayCircleOutline color={'success'} />,
+                        color: isActive ? 'warning' : 'success',
+                        disabled: !competition || isTogglingStatus,
+                    },
                     {
                         label:'Edit Details',
                         onClick:async()=>{

@@ -1,6 +1,7 @@
 'use server';
-import { createCompetition, getCompetitions, getCompetition, updateCompetition } from "@/app/server/competitions/competitionActions";
-import { updateAdjudicators, getAdjudicators } from "@/app/server/competitions/adjudicatorActions";
+import { createCompetition, getCompetitions, getCompetition, updateCompetition, updateCompetitionStatus } from "@/app/server/competitions/competitionActions";
+import { updateAdjudicators, getAdjudicators, getAdjudicatorDetail, updateAdjudicatorContact } from "@/app/server/competitions/adjudicatorActions";
+import { sendAdjudicatorLoginEmail } from "@/app/server/competitions/adjudicatorEmailActions";
 import { createPanel, updatePanel, deletePanel, getPanels } from "@/app/server/competitions/panelActions";
 import { createSection, updateSection, deleteSection, getCompetitionSections, getCompetitionSection, getSectionHeats } from "@/app/server/competitions/sectionActions";
 import { createDancer, updateDancer, deleteDancer, getSectionDancers, importDancers } from "@/app/server/competitions/dancerActions";
@@ -13,8 +14,12 @@ export {
     getCompetitions,
     getCompetition,
     updateCompetition,
+    updateCompetitionStatus,
     updateAdjudicators,
     getAdjudicators,
+    getAdjudicatorDetail,
+    updateAdjudicatorContact,
+    sendAdjudicatorLoginEmail,
     createPanel,
     updatePanel,
     deletePanel,

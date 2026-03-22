@@ -1,0 +1,20 @@
+enum AdjudicatorAction {
+  CREATE
+  UPDATE
+  DELETE
+  COMMENT
+  SUBMIT_MARKS
+  LOGIN
+  LOGOUT
+}
+
+model adjudicator_log {
+  uid            String      @id @unique @default(uuid()) @db.Uuid
+  created        DateTime    @default(now())
+  updated        DateTime    @updatedAt
+  adjudicator_id String      @db.Uuid
+  adjudicator    adjudicator @relation(fields: [adjudicator_id], references: [uid])
+  action         String
+  message        String
+  details        Json?
+}

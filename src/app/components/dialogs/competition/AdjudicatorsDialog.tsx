@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { Dialog, DialogTitle, DialogActions, DialogContent, Button, CircularProgress, Grid, Stack } from "@mui/material";
-import { DialogProps } from "@toolpad/core";
+import { Dialog, DialogTitle, DialogActions, DialogContent, Button, CircularProgress, Grid, Stack, IconButton } from "@mui/material";
+import { DialogProps, useDialogs } from "@toolpad/core";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { CompetitionAdjudicatorsSchema, CompetitionAdjudicatorsType } from "@/app/schemas/CompetitionAdjudicatorsSchema";
 import { flattenDeep, get } from "lodash";
@@ -10,6 +10,8 @@ import { useSnackbar } from "notistack";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { updateAdjudicators } from "@/app/server/competitions";
+import AdjudicatorDetailDialog from "@/app/components/dialogs/competition/AdjudicatorDetailDialog";
+import { InfoOutlined } from "@mui/icons-material";
 
 
 const letters = [
@@ -24,6 +26,7 @@ const AdjudicatorsDialog: React.FC<DialogProps<CompetitionAdjudicatorsType|undef
 }) => {
 
     const { competitionId } = useParams()
+    const dialogs = useDialogs();
 
     const {
         control,
@@ -123,22 +126,34 @@ const AdjudicatorsDialog: React.FC<DialogProps<CompetitionAdjudicatorsType|undef
                         >
                             <Stack spacing={2}>
                                 {firstLetters?.map((letter, index)=>(
-                                    <Controller
-                                        key={letter.letter}
-                                        render={({ field })=>(
-                                            <CustomInput
-                                                {...field}
-                                                label={letter.letter}
-                                                value={field.value as any}
-                                                error={Boolean(errors?.adjudicators && errors?.adjudicators[index])}
-                                                helperText={errors?.adjudicators && errors?.adjudicators[index]?.name?.message}
-                                                onChange={field.onChange}
-                                                size={'small'}
-                                            />
+                                    <Stack key={letter.letter} direction="row" spacing={1} alignItems="center">
+                                        <Controller
+                                            render={({ field })=>(
+                                                <CustomInput
+                                                    {...field}
+                                                    label={letter.letter}
+                                                    value={field.value as any}
+                                                    error={Boolean(errors?.adjudicators && errors?.adjudicators[index])}
+                                                    helperText={errors?.adjudicators && errors?.adjudicators[index]?.name?.message}
+                                                    onChange={field.onChange}
+                                                    size={'small'}
+                                                    sx={{ flex: 1 }}
+                                                />
+                                            )}
+                                            name={`adjudicators.${index}.name`}
+                                            control={control}
+                                        />
+                                        {fields[index]?.uid && (
+                                            <IconButton
+                                                size="small"
+                                                onClick={async () => {
+                                                    await dialogs.open(AdjudicatorDetailDialog, fields[index] as any);
+                                                }}
+                                            >
+                                                <InfoOutlined fontSize="small" />
+                                            </IconButton>
                                         )}
-                                        name={`adjudicators.${index}.name`}
-                                        control={control}
-                                    />
+                                    </Stack>
                                 ))}
                             </Stack>
                         </Grid>
@@ -150,22 +165,34 @@ const AdjudicatorsDialog: React.FC<DialogProps<CompetitionAdjudicatorsType|undef
                         >
                             <Stack spacing={2}>
                                 {secondLetters?.map((letter, index)=>(
-                                    <Controller
-                                        key={letter.letter}
-                                        render={({ field })=>(
-                                            <CustomInput
-                                                {...field}
-                                                label={letter.letter}
-                                                value={field.value as any}
-                                                error={Boolean(errors?.adjudicators && errors?.adjudicators[index])}
-                                                helperText={errors?.adjudicators && errors?.adjudicators[index]?.name?.message}
-                                                onChange={field.onChange}
-                                                size={'small'}
-                                            />
+                                    <Stack key={letter.letter} direction="row" spacing={1} alignItems="center">
+                                        <Controller
+                                            render={({ field })=>(
+                                                <CustomInput
+                                                    {...field}
+                                                    label={letter.letter}
+                                                    value={field.value as any}
+                                                    error={Boolean(errors?.adjudicators && errors?.adjudicators[index+13])}
+                                                    helperText={errors?.adjudicators && errors?.adjudicators[index+13]?.name?.message}
+                                                    onChange={field.onChange}
+                                                    size={'small'}
+                                                    sx={{ flex: 1 }}
+                                                />
+                                            )}
+                                            name={`adjudicators.${index+13}.name`}
+                                            control={control}
+                                        />
+                                        {fields[index+13]?.uid && (
+                                            <IconButton
+                                                size="small"
+                                                onClick={async () => {
+                                                    await dialogs.open(AdjudicatorDetailDialog, fields[index+13] as any);
+                                                }}
+                                            >
+                                                <InfoOutlined fontSize="small" />
+                                            </IconButton>
                                         )}
-                                        name={`adjudicators.${index+13}.name`}
-                                        control={control}
-                                    />
+                                    </Stack>
                                 ))}
                             </Stack>
                         </Grid>

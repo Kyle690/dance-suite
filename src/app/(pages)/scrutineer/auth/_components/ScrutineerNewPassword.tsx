@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createClient } from "@/app/lib/supabase/client";
 import { Controller, useForm } from "react-hook-form";
-import { SignInFormType, SignInSchema } from "@/app/schemas/AuthSchema";
+import { NewPasswordFormType, NewPasswordSchema } from "@/app/schemas/AuthSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import {
@@ -11,53 +11,36 @@ import {
     Card,
     CardContent,
     CircularProgress,
-    Divider,
-    Link as MuiLink,
     Stack,
-    Typography
+    Typography,
 } from "@mui/material";
 import CustomInput from "@/app/components/forms/CustomInput";
 
-type ScrutineerSignInType = {
-    onModeChange: () => void;
-    onForgotPassword: () => void;
-};
-const ScrutineerSignIn: React.FC<ScrutineerSignInType> = ({
-    onModeChange,
-    onForgotPassword,
-}) => {
-    const router = useRouter();
+const ScrutineerNewPassword: React.FC = () => {
     const supabase = createClient();
+    const router = useRouter();
     const [ error, setError ] = useState<string | null>(null);
 
     const {
         control,
         handleSubmit,
         formState: { errors, isValid, isSubmitting },
-    } = useForm<SignInFormType>({
-        defaultValues: {
-            email: '',
-            password: '',
-        },
+    } = useForm<NewPasswordFormType>({
+        defaultValues: { password: '', confirmPassword: '' },
         mode: 'onChange',
-        resolver: zodResolver(SignInSchema),
+        resolver: zodResolver(NewPasswordSchema),
     });
 
-    const onSubmit = async (data: SignInFormType) => {
+    const onSubmit = async (data: NewPasswordFormType) => {
         setError(null);
         try {
-            const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-                email: data.email,
+            const { error: updateError } = await supabase.auth.updateUser({
                 password: data.password,
             });
-
-            if (authError) throw authError;
-
-            if (authData.user) {
-                router.replace('/scrutineer/profile')
-            }
+            if (updateError) throw updateError;
+            router.replace('/scrutineer/profile');
         } catch (err: any) {
-            setError(err.message || 'An error occurred during sign in');
+            setError(err.message || 'An error occurred. Please try again.');
         }
     };
 
@@ -78,13 +61,13 @@ const ScrutineerSignIn: React.FC<ScrutineerSignInType> = ({
                         variant="h4" component="h1"
                         gutterBottom textAlign="center"
                     >
-                        Welcome Back
+                        Set New Password
                     </Typography>
                     <Typography
                         variant="body2" color="text.secondary"
                         textAlign="center" sx={{ mb: 3 }}
                     >
-                        Sign in to your scrutineer account
+                        Choose a strong password for your account.
                     </Typography>
 
                     {error && (
@@ -98,18 +81,17 @@ const ScrutineerSignIn: React.FC<ScrutineerSignInType> = ({
                         spacing={2}
                     >
                         <Controller
-                            name="email"
+                            name="password"
                             control={control}
                             render={({ field }) => (
                                 <CustomInput
                                     {...field}
-                                    inputType="email"
-                                    label="Email Address"
-                                    type="email"
+                                    inputType="password"
+                                    label="New Password"
                                     value={field.value as any}
-                                    error={!!errors.email}
-                                    helperText={errors.email?.message}
-                                    autoComplete="email"
+                                    error={!!errors.password}
+                                    helperText={errors.password?.message ?? 'Must be at least 6 characters'}
+                                    autoComplete="new-password"
                                     autoFocus
                                     disabled={isSubmitting}
                                     variant="outlined"
@@ -117,17 +99,17 @@ const ScrutineerSignIn: React.FC<ScrutineerSignInType> = ({
                             )}
                         />
                         <Controller
-                            name="password"
+                            name="confirmPassword"
                             control={control}
                             render={({ field }) => (
                                 <CustomInput
                                     {...field}
                                     inputType="password"
-                                    label="Password"
+                                    label="Confirm New Password"
                                     value={field.value as any}
-                                    error={!!errors.password}
-                                    helperText={errors.password?.message}
-                                    autoComplete="current-password"
+                                    error={!!errors.confirmPassword}
+                                    helperText={errors.confirmPassword?.message}
+                                    autoComplete="new-password"
                                     disabled={isSubmitting}
                                     variant="outlined"
                                 />
@@ -140,34 +122,8 @@ const ScrutineerSignIn: React.FC<ScrutineerSignInType> = ({
                             size="large"
                             disabled={!isValid || isSubmitting}
                         >
-                            {isSubmitting ? <CircularProgress size={24} /> : 'Sign In'}
+                            {isSubmitting ? <CircularProgress size={24} /> : 'Update Password'}
                         </Button>
-
-                        <Box sx={{ textAlign: 'right' }}>
-                            <MuiLink
-                                component={Button}
-                                onClick={onForgotPassword}
-                                underline="hover"
-                                sx={{ fontSize: '0.8125rem' }}
-                            >
-                                Forgot password?
-                            </MuiLink>
-                        </Box>
-
-                        <Divider />
-
-                        <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="body2" color="text.secondary">
-                                Don't have an account?{' '}
-                                <MuiLink
-                                    component={Button}
-                                    onClick={onModeChange}
-                                    underline="hover"
-                                >
-                                    Sign Up
-                                </MuiLink>
-                            </Typography>
-                        </Box>
                     </Stack>
                 </CardContent>
             </Card>
@@ -175,4 +131,4 @@ const ScrutineerSignIn: React.FC<ScrutineerSignInType> = ({
     );
 };
 
-export default ScrutineerSignIn;
+export default ScrutineerNewPassword;
