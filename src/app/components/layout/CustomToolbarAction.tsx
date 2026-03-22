@@ -3,7 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCompetition, updateCompetitionStatus } from "@/app/server/competitions";
 import { IconButton, Stack, Tooltip } from "@mui/material";
-import { ExitToAppOutlined, Edit, Delete, People, FormatListNumberedRtl, DarkMode, LightMode, PlayCircleOutline, PauseCircleOutline } from '@mui/icons-material'
+import { ExitToAppOutlined, Edit, Archive, People, FormatListNumberedRtl, DarkMode, LightMode, PlayCircleOutline, PauseCircleOutline } from '@mui/icons-material'
 import MenuButtons from "@/app/components/layout/MenuButtons";
 import { competition } from "@prisma/client";
 import { useDialogs } from "@toolpad/core";
@@ -38,7 +38,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
     const isActive = competition?.status === 'ACTIVE';
 
     const { mutate: toggleStatus, isPending: isTogglingStatus } = useMutation({
-        mutationKey: ['update-competition-status', competition?.uid],
+        mutationKey: [ 'update-competition-status', competition?.uid ],
         mutationFn: () => updateCompetitionStatus(competition!.uid),
         onSuccess: async (data) => {
             if (data?.data) {
@@ -47,7 +47,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                     newStatus === 'ACTIVE' ? 'Competition activated' : 'Competition set to draft',
                     { variant: 'success' }
                 );
-                await queryClient.invalidateQueries({ queryKey: ['getCompetition', competition?.uid] });
+                await queryClient.invalidateQueries({ queryKey: [ 'getCompetition', competition?.uid ] });
             }
         },
         onError: () => {
@@ -66,6 +66,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                 id={'competition'}
                 menuName={'Competition'}
                 buttons={[
+                    { type: 'subheader', label: 'Competition' },
                     {
                         label: isActive ? 'Set to Draft' : 'Activate Competition',
                         onClick: () => toggleStatus(),
@@ -76,36 +77,41 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                         disabled: !competition || isTogglingStatus,
                     },
                     {
-                        label:'Edit Details',
-                        onClick:async()=>{
-                            await dialogs.open(CompetitionDetailsDialog,competition)
+                        label: 'Edit Details',
+                        onClick: async () => {
+                            await dialogs.open(CompetitionDetailsDialog, competition);
                         },
-                        icon:<Edit color={'primary'}/>,
-                        color:'primary',
-                        disabled:!competition || adjudicatorsLoading
+                        icon: <Edit color={'primary'} />,
+                        color: 'primary',
+                        disabled: !competition,
                     },
                     {
-                        label:'Delete',
-                        onClick:()=>{},
-                        icon:<Delete color={'error'}/>,
-                        color:'error',
+                        label: 'Archive Competition',
+                        onClick: () => {},
+                        icon: <Archive color={'error'} />,
+                        color: 'error',
+                        disabled: !competition,
+                    },
+                    { type: 'divider' },
+                    { type: 'subheader', label: 'Configuration' },
+                    {
+                        label: 'Adjudicators',
+                        onClick: async () => {
+                            dialogs.open(AdjudicatorsDialog, adjudicators ? adjudicators : undefined);
+                        },
+                        icon: <People color={'primary'} />,
+                        color: 'primary',
+                        disabled: !competition,
                     },
                     {
-                        label:'Adjudicators',
-                        onClick:async()=>{
-                            dialogs.open(AdjudicatorsDialog,adjudicators?adjudicators:undefined)
+                        label: 'Panels',
+                        onClick: async () => {
+                            await dialogs.open(PanelsDialog);
                         },
-                        icon:<People color={'primary'}/>,
-                        color:'primary'
+                        icon: <FormatListNumberedRtl color={'secondary'} />,
+                        color: 'secondary',
+                        disabled: !competition,
                     },
-                    {
-                        label:'Panels',
-                        onClick:async()=>{
-                            await dialogs.open(PanelsDialog)
-                        },
-                        icon:<FormatListNumberedRtl color={'secondary'}/>,
-                        color:'secondary',
-                    }
                 ]}
 
             />
