@@ -8,15 +8,16 @@ enum UserTypes {
 }
 
 model users {
-  uid                String      @id @unique @default(uuid()) @db.Uuid
-  created            DateTime    @default(now())
-  updated            DateTime    @updatedAt
-  external_id        String?     @unique
-  stripe_customer_id String?     @unique
-  user_types         UserTypes[] @default([])
-  is_deleted         Boolean     @default(false)
-  deleted_at         DateTime?
-  deleted_by_id      String?     @db.Uuid
+  uid                  String      @id @unique @default(uuid()) @db.Uuid
+  created              DateTime    @default(now())
+  updated              DateTime    @updatedAt
+  external_id          String?     @unique
+  stripe_customer_id   String?     @unique
+  user_types           UserTypes[] @default([])
+  is_deleted           Boolean     @default(false)
+  deleted_at           DateTime?
+  deleted_by_id        String?     @db.Uuid
+  completed_onboarding Boolean     @default(false)
 
   user_licenses     user_license[]
   competition_users competition_users[]

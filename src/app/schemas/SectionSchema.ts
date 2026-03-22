@@ -93,6 +93,27 @@ export const SectionHeatRoundResultSchema = z.object({
     })),
 })
 
+export const CompetitionImportRowSchema = z.object({
+    number: z.string().min(1),
+    name: z.string().min(1),
+    partner_name: z.string().optional().nullable(),
+    studio: z.string().optional().nullable(),
+    region: z.string().optional().nullable(),
+    country: z.string().optional().nullable(),
+    section_name: z.string().min(1),
+    competitive_type: z.enum(CompetitiveType).default(CompetitiveType.COMPETITIVE),
+    entry_type: z.enum(SectionEntryType).default(SectionEntryType.COUPLE),
+});
+
+export type CompetitionImportRowType = z.infer<typeof CompetitionImportRowSchema>;
+
+export const CompetitionImportSchema = z.object({
+    competition_id: z.string().uuid(),
+    rows: z.array(CompetitionImportRowSchema).min(1),
+});
+
+export type CompetitionImportType = z.infer<typeof CompetitionImportSchema>;
+
 export const FinalResultSchema = z.object({
     heat_id: z.string().min(8),
     results: z.array(z.object({

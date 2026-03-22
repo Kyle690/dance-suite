@@ -3,13 +3,14 @@ import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCompetition, updateCompetitionStatus } from "@/app/server/competitions";
 import { IconButton, Stack, Tooltip } from "@mui/material";
-import { ExitToAppOutlined, Edit, Archive, People, FormatListNumberedRtl, DarkMode, LightMode, PlayCircleOutline, PauseCircleOutline } from '@mui/icons-material'
+import { ExitToAppOutlined, Edit, Archive, People, FormatListNumberedRtl, DarkMode, LightMode, PlayCircleOutline, PauseCircleOutline, Upload } from '@mui/icons-material'
 import MenuButtons from "@/app/components/layout/MenuButtons";
 import { competition } from "@prisma/client";
 import { useDialogs } from "@toolpad/core";
 import CompetitionDetailsDialog from "@/app/components/dialogs/competition/CompetitionDetailsDialog";
 import AdjudicatorsDialog from "@/app/components/dialogs/competition/AdjudicatorsDialog";
 import PanelsDialog from "@/app/components/dialogs/competition/PanelsDialog";
+import CompetitionImportDialog from "@/app/components/dialogs/competition/CompetitionImportDialog";
 import { useAdjudicators } from "@/app/hooks/useAdjudicators";
 import { useColorScheme } from "@mui/material/styles";
 import UserMenu from "@/app/components/UserMenu";
@@ -30,10 +31,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
     const { enqueueSnackbar } = useSnackbar();
     const queryClient = useQueryClient();
 
-    const {
-        data:adjudicators,
-        isLoading:adjudicatorsLoading
-    }=useAdjudicators(String(competition?.uid))
+    const { data: adjudicators } = useAdjudicators(String(competition?.uid))
 
     const isActive = competition?.status === 'ACTIVE';
 
@@ -97,7 +95,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                     {
                         label: 'Adjudicators',
                         onClick: async () => {
-                            dialogs.open(AdjudicatorsDialog, adjudicators ? adjudicators : undefined);
+                            await dialogs.open(AdjudicatorsDialog, adjudicators ? adjudicators : undefined);
                         },
                         icon: <People color={'primary'} />,
                         color: 'primary',
@@ -110,6 +108,17 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
                         },
                         icon: <FormatListNumberedRtl color={'secondary'} />,
                         color: 'secondary',
+                        disabled: !competition,
+                    },
+                    { type: 'divider' },
+                    { type: 'subheader', label: 'Data' },
+                    {
+                        label: 'Import CSV',
+                        onClick: async () => {
+                            await dialogs.open(CompetitionImportDialog, competition!);
+                        },
+                        icon: <Upload color={'info'} />,
+                        color: 'info',
                         disabled: !competition,
                     },
                 ]}
