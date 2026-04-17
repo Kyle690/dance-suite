@@ -1,0 +1,9 @@
+model heat_dancers {
+  uid       String   @id @unique @default(uuid()) @db.Uuid
+  created   DateTime @default(now())
+  updated   DateTime @updatedAt
+  heat_id   String   @db.Uuid
+  heat      heat     @relation(fields: [heat_id], references: [uid], onDelete: Cascade)
+  dancer_id String   @db.Uuid
+  dancer    dancers  @relation(fields: [dancer_id], references: [uid], onDelete: Cascade)
+}
