@@ -172,30 +172,22 @@ export const submitFinalMarks = safeAction.inputSchema(FinalMarkSchema).action(a
 });
 
 export const getHeatRoundMarks = safeAction.inputSchema(UidSchema).action(async({ parsedInput })=>{
-    return prisma.heat.findUnique({
-        where:{
-            uid:parsedInput
-        },
+    const result = await prisma.heat.findUnique({
+        where:{ uid:parsedInput },
         include:{
             panel:{
                 include:{
                     panels_adjudicators:{
-                        include:{
-                            adjudicator:true
-                        }
+                        include:{ adjudicator:true }
                     }
                 }
             },
             heat_marks:{
                 include:{
-                    marks:{
-                        include:{
-                            dancer:true
-                        }
-                    }
+                    marks:{ include:{ dancer:true } }
                 }
             },
-            start_list:true,
+            start_list:{ include:{ dancer:true } },
             section:{
                 include:{
                     competition:{
@@ -210,15 +202,16 @@ export const getHeatRoundMarks = safeAction.inputSchema(UidSchema).action(async(
             },
             heat_result:{
                 include:{
-                    heat_result_dancer:{
-                        include:{
-                            dancer:true
-                        }
-                    }
+                    heat_result_dancer:{ include:{ dancer:true } }
                 }
             },
         }
-    })
+    });
+    if(!result) return null;
+    return {
+        ...result,
+        start_list: result.start_list.map((hd)=>hd.dancer),
+    };
 })
 
 export const createHeatResult = safeAction.inputSchema(SectionHeatRoundResultSchema).action(async({ parsedInput, ctx })=>{
@@ -319,13 +312,6 @@ export const createHeatResult = safeAction.inputSchema(SectionHeatRoundResultSch
                 },
                 panel_id:heat.panel_id,
                 callback_limit:0,
-                start_list:{
-                    connect:parsedInput.results.filter((r)=>r.called_back).map((r)=>{
-                        return{
-                            uid:r.dancer_id
-                        }
-                    })
-                },
                 competition_log:{
                     create:{
                         event_type:CompetitionLogEventType.HEAT_CREATED,
@@ -336,7 +322,17 @@ export const createHeatResult = safeAction.inputSchema(SectionHeatRoundResultSch
                     }
                 }
             }
-        })
+        });
+
+        const calledBackIds = parsedInput.results.filter((r)=>r.called_back).map((r)=>r.dancer_id);
+        if(calledBackIds.length > 0){
+            await prisma.heat_dancers.createMany({
+                data:calledBackIds.map((dancerId)=>({
+                    heat_id:nextHeat!.uid,
+                    dancer_id:dancerId,
+                }))
+            });
+        }
     }
 
     console.log('Next heat to update with callbacks:', nextHeat);
@@ -396,7 +392,7 @@ export const deleteMarks =safeAction.inputSchema(UidSchema).action(async({ parse
 
 export const getHeatRoundResult = safeAction.inputSchema(UidSchema).action(async({ parsedInput })=>{
 
-    const heat = await prisma.heat.findUnique({
+    const heatRaw = await prisma.heat.findUnique({
         where:{
             uid:parsedInput
         },
@@ -419,7 +415,7 @@ export const getHeatRoundResult = safeAction.inputSchema(UidSchema).action(async
                     }
                 }
             },
-            start_list:true,
+            start_list:{ include:{ dancer:true } },
             section:{
                 include:{
                     competition:{
@@ -443,6 +439,12 @@ export const getHeatRoundResult = safeAction.inputSchema(UidSchema).action(async
             },
         }
     })
+
+    const flatHeat = heatRaw ? {
+        ...heatRaw,
+        start_list: heatRaw.start_list.map((hd)=>hd.dancer),
+    } : null;
+    const heat = flatHeat;
 
     const dances = heat?.dances || [];
     const adjudicators = sortBy(heat?.panel?.panels_adjudicators?.map((p)=>p.adjudicator),'letter') || [];

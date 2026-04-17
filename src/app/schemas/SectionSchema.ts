@@ -123,3 +123,9 @@ export const FinalResultSchema = z.object({
 })
 
 export type FinalResultSchemaType = z.infer<typeof FinalResultSchema>;
+
+
+export const HeatStatusSchema = z.object({
+    heat_id: z.string().min(8),
+    status:z.nativeEnum(HeatStatus)
+})

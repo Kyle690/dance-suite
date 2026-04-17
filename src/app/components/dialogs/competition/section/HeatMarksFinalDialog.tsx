@@ -28,10 +28,13 @@ type HeatMarksFinalDialogProps = {
         }[]
     },
     start_list:{
-        uid: string,
-        number: number,
-        name: string,
-        partner_name: string,
+        uid:string,
+        dancer:{
+            uid: string,
+            number: number,
+            name: string,
+            partner_name: string,
+        }
     }[],
     dances:string[]
     item_no:string,
@@ -74,7 +77,7 @@ const HeatMarksFinalDialog: React.FC<DialogProps<HeatMarksFinalDialogProps>> = (
     }=useMemo(()=>{
         const dances = payload?.dances || [];
         const adjudicators = sortBy(payload?.panel?.panels_adjudicators?.map((p)=>({ letter:p.adjudicator.letter, adjudicator_id:p.adjudicator_id })),'letter')
-        const dancers = sortBy(payload.start_list,'number');
+        const dancers = payload.start_list.map(dancer=>dancer.dancer);
 
         const defaultMarks = adjudicators.reduce((a:RoundMarkEntry[],v)=>{
 
@@ -479,8 +482,8 @@ const HeatMarksFinalDialog: React.FC<DialogProps<HeatMarksFinalDialogProps>> = (
                                     value={'' as any}
                                     onChange={(e)=>{}}
                                     options={payload?.start_list?.map((dancer)=>({
-                                        label: dancer.name,
-                                        value: dancer.uid
+                                        label: dancer.dancer.uid,
+                                        value: dancer.dancer.uid
                                     }))}
                                 />
                                 <Button

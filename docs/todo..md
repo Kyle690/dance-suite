@@ -16,3 +16,8 @@
 - Approve Function
   - creates next round ect
 - Heat screen
+
+# Scrutineer
+
+### Heat
+- Enter remaining / partial marks from a round / final 

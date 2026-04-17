@@ -35,3 +35,12 @@ export const NewPasswordSchema = z.object({
 });
 
 export type NewPasswordFormType = z.infer<typeof NewPasswordSchema>;
+
+export const AdjudicatorSignInSchema = z.object({
+    competition_id: z.uuid(),
+    login_code: z.string()
+        .length(6, 'Login code must be 6 digits')
+        .regex(/^\d+$/, 'Login code must be numeric'),
+});
+
+export type AdjudicatorSignInFormType = z.infer<typeof AdjudicatorSignInSchema>;

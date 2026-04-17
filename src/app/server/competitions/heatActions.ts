@@ -1,8 +1,9 @@
 import { safeAction } from "@/app/lib/safeAction";
-import { SectionHeatSchema, SectionHeatStartListSchema } from "@/app/schemas/SectionSchema";
+import { HeatStatusSchema, SectionHeatSchema, SectionHeatStartListSchema } from "@/app/schemas/SectionSchema";
 import { prisma } from "@/app/lib/prisma";
 import { UidSchema } from "@/app/schemas/CommonSchema";
-import { HeatStatus } from "@prisma/client";
+import { CompetitionLogEventType, HeatStatus } from "@prisma/client";
+import { getCompetitionUser } from "@/app/server/competitions/competitionActions";
 
 
 export const createHeat = safeAction.inputSchema(SectionHeatSchema).action(async({ parsedInput, ctx })=>{
@@ -61,28 +62,40 @@ export const deleteHeat = safeAction.inputSchema(SectionHeatSchema.pick({ uid:tr
     })
 })
 
-export const activateHeat = safeAction.inputSchema(UidSchema).action(async({ parsedInput, ctx })=>{
+export const updateHeatStatus = safeAction.inputSchema(HeatStatusSchema).action(async({ parsedInput, ctx })=>{
+
+    const eventType = ()=>{
+        switch(parsedInput.status){
+        case HeatStatus.ACTIVE:
+            return CompetitionLogEventType.HEAT_ACTIVE
+        case HeatStatus.READY:
+            return CompetitionLogEventType.HEAT_READY
+        case HeatStatus.MARSHALLING:
+            return CompetitionLogEventType.HEAT_MARSHALLING
+        default:
+            throw new Error(`Invalid heat status: ${parsedInput.status}`)
+        }
+    }
+
+    const competitionUser = await getCompetitionUser({
+        userId:ctx.user.id,
+        competitionId:String(ctx.competition_id)
+    })
+
+    console.log('changing heat status', parsedInput)
+
     return prisma.heat.update({
         where:{
-            uid:parsedInput
+            uid:parsedInput.heat_id
         },
         data:{
-            status:HeatStatus.ACTIVE
-        }
-    })
-})
-
-
-export const getHeatDancers = safeAction.inputSchema(UidSchema).action(async({ parsedInput })=>{
-    return prisma.heat.findUnique({
-        where:{
-            uid:parsedInput
-        },
-        include:{
-            start_list:true,
-            section:{
-                include:{
-                    dancers:true
+            status:parsedInput.status,
+            competition_log:{
+                create:{
+                    event_type:eventType(),
+                    competition_id:String(competitionUser?.data?.competition_id),
+                    user_id:competitionUser?.data?.uid,
+                    note:`User set the heat to ${parsedInput.status}`
                 }
             }
         }
@@ -90,25 +103,43 @@ export const getHeatDancers = safeAction.inputSchema(UidSchema).action(async({ p
 })
 
 
+export const getHeatDancers = safeAction.inputSchema(UidSchema).action(async({ parsedInput })=>{
+    const result = await prisma.heat.findUnique({
+        where:{ uid:parsedInput },
+        include:{
+            start_list:{
+                include:{
+                    dancer:true
+                }
+            },
+            section:{ include:{ dancers:true } }
+        }
+    });
+    if(!result) return null;
+    return {
+        ...result,
+        start_list: result.start_list.map((hd)=>hd.dancer),
+    };
+})
+
+
 
 export const updateHeatDancers = safeAction.inputSchema(SectionHeatStartListSchema).action(async({ parsedInput })=>{
 
-    const connectDancers = await prisma.heat.update({
-        where:{
-            uid:parsedInput.heat_id
-        },
-        data:{
-            start_list:{
-                set:parsedInput.start_list.map((dancerId)=>({
-                    uid:dancerId
-                }))
-            }
-        }
-    })
-    // TODO - if dancers are part of a previous heat and have been removed they need to be adjusted accordingly
+    await prisma.heat_dancers.deleteMany({
+        where:{ heat_id:parsedInput.heat_id }
+    });
 
-    return connectDancers;
+    if(parsedInput.start_list.length > 0){
+        await prisma.heat_dancers.createMany({
+            data:parsedInput.start_list.map((dancerId)=>({
+                heat_id:parsedInput.heat_id,
+                dancer_id:dancerId,
+            }))
+        });
+    }
 
+    return prisma.heat.findUnique({ where:{ uid:parsedInput.heat_id } });
 })
 
 export const getCompetitionHeats = safeAction.inputSchema(UidSchema).action(async({ parsedInput })=>{
@@ -119,10 +150,19 @@ export const getCompetitionHeats = safeAction.inputSchema(UidSchema).action(asyn
             }
         },
         orderBy:{
-            order:'asc'
+            item_no:'asc'
         },
         include:{
-            start_list:true,
+            start_list:{
+                orderBy:{
+                    dancer:{
+                        number:'asc'
+                    }
+                },
+                include:{
+                    dancer:true
+                }
+            },
             section:{
                 select:{
                     name:true
@@ -150,7 +190,7 @@ export default {
     createHeat,
     updateHeat,
     deleteHeat,
-    activateHeat,
+    updateHeatStatus,
     getHeatDancers,
     updateHeatDancers,
     getCompetitionHeats,

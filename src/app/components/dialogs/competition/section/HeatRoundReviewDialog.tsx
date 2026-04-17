@@ -357,7 +357,7 @@ const HeatRoundReviewDialog: React.FC<DialogProps<HeatRoundReviewDialogProps, bo
                                         Panel
                                     </Typography>
                                     <Typography variant={'h6'}>
-                                        {data?.panel?.panels_adjudicators.map(p=>p.adjudicator.letter).join(', ')}
+                                        {data?.panel?.panels_adjudicators.map(p=>p.adjudicator.letter).sort().join(', ')}
                                     </Typography>
                                 </Stack>
                                 <Stack

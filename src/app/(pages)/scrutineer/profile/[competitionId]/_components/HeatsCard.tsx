@@ -142,8 +142,8 @@ const HeatsCard = () => {
                     showToolbar
                     loading={isLoading}
                     disableColumnSelector
-                    disableColumnFilter
-                    disableColumnSorting
+                    //disableColumnFilter
+                    //disableColumnSorting
                     disableColumnMenu
                     slotProps={{
                         toolbar: {

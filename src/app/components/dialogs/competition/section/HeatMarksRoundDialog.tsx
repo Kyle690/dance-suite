@@ -29,10 +29,13 @@ type RoundMarksDialogProps = {
         }[]
     },
     start_list:{
-        uid: string,
-        number: number,
-        name: string,
-        partner_name: string,
+        uid:string,
+        dancer:{
+            uid: string,
+            number: number,
+            name: string,
+            partner_name: string,
+        }
     }[],
     dances:string[]
     item_no:string,
@@ -64,6 +67,8 @@ const HeatMarksRoundDialog: React.FC<DialogProps<RoundMarksDialogProps, boolean>
     onClose,
     payload,
 }) => {
+
+    console.log('payload', payload)
 
     const [ activePosition, setActivePosition ]=useState<number>(0);
 
@@ -110,7 +115,7 @@ const HeatMarksRoundDialog: React.FC<DialogProps<RoundMarksDialogProps, boolean>
                 adjudicator_uid:a.adjudicator_id,
                 letter:a?.adjudicator?.letter,
             })),
-            dancers:orderBy(payload.start_list,'number'),
+            dancers:payload.start_list.map(dancer=>dancer.dancer),
             defaultMarks
         }
     },[ payload ])

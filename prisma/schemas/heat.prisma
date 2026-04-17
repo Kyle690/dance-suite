@@ -30,7 +30,7 @@ model heat {
   type            HeatType              @default(ROUND)
   callback_limit  Int?
   dances          String[]
-  start_list      dancers[]
+  start_list      heat_dancers[]
   panel_id        String?               @db.Uuid
   panel           panels?               @relation(fields: [panel_id], references: [uid])
   schedule_id     String?               @db.Uuid

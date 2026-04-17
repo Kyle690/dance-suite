@@ -68,7 +68,7 @@ export const getCompetitionSection = safeAction.inputSchema(SectionSchema.pick({
 })
 
 export const getSectionHeats = safeAction.inputSchema(SectionSchema.pick({ uid:true })).action(async({ parsedInput })=>{
-    return prisma.heat.findMany({
+    const heats = await prisma.heat.findMany({
         where:{
             section_id:String(parsedInput.uid)
         },
@@ -76,7 +76,11 @@ export const getSectionHeats = safeAction.inputSchema(SectionSchema.pick({ uid:t
             order:'asc'
         },
         include:{
-            start_list:true,
+            start_list:{
+                include:{
+                    dancer:true
+                }
+            },
             section:{
                 select:{
                     name:true
@@ -96,6 +100,18 @@ export const getSectionHeats = safeAction.inputSchema(SectionSchema.pick({ uid:t
                     }
                 }
             }
+        }
+    })
+
+    return heats.map((heat)=>{
+        return {
+            ...heat,
+            start_list:heat.start_list.map((dancer)=>{
+                return {
+                    ...dancer,
+                    number:dancer.dancer.number
+                }
+            })
         }
     })
 })

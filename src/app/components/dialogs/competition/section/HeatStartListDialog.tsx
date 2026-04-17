@@ -174,7 +174,7 @@ const HeatStartListDialog: React.FC<DialogProps<HeatStartListProps, boolean>> = 
                     variant={'contained'}
                     onClick={()=>mutate()}
                 >
-                    {isPending? <CircularProgress/>:'Submit'}
+                    {isPending? <CircularProgress size={20} color={'inherit'}/>:'Submit'}
                 </Button>
             </DialogActions>
         </Dialog>

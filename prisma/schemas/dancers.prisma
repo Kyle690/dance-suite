@@ -25,8 +25,7 @@ model dancers {
   deleted_by_id     String?              @db.Uuid
   deleted_by        competition_users?   @relation("dancer_deleted_by", fields: [deleted_by_id], references: [uid])
   competition_log    competition_log[]
-  heat               heat?                @relation(fields: [heatUid], references: [uid])
-  heatUid            String?              @db.Uuid
+  heat_dancers       heat_dancers[]
   heat_result_dancer heat_result_dancer[]
   marks              marks[]
   section_result     section_result[]

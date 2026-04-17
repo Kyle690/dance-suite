@@ -9,9 +9,9 @@ import {
     ChecklistRtlSharp,
     FilterListOffRounded,
     PlayArrowSharp,
-    ChecklistSharp, ListAlt,
+    ChecklistSharp, ListAlt, PlayArrow,
 } from '@mui/icons-material';
-import { activateHeat, deleteHeat } from "@/app/server/competitions";
+import { updateHeatStatus, deleteHeat } from "@/app/server/competitions";
 import { useSnackbar } from "notistack";
 import HeatDialog from "@/app/components/dialogs/competition/section/HeatDialog";
 import HeatStartListDialog from "@/app/components/dialogs/competition/section/HeatStartListDialog";
@@ -134,6 +134,35 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
                     }
                 },
             },
+            {
+                label:'Start Heat',
+                icon:<PlayArrow color={'success'}/>,
+                disabled:!data?.start_list?.length,
+                onClick:async()=>{
+                    if(!data?.start_list?.length){
+                        await dialogs.alert('Cannot start heat without any dancers. Please add dancers to the heat before starting.',{
+                            title:'Start Heat Error',
+                        })
+                        return;
+                    }
+                    await dialogs.confirm('Once started this will appear in the adjudicators queue for adjudication!',{
+                        title:'Are you sure you want to start this heat?',
+                        okText:'Start',
+                        cancelText:'Cancel',
+                        onClose:async(res)=>{
+                            if(res) {
+                                const result =  await updateHeatStatus({
+                                    heat_id: data?.uid,
+                                    status: HeatStatus.READY,
+                                })
+                                console.log('Heat status update rstult', result);
+                                refetch()
+                            }
+                        }
+                    })
+
+                }
+            }
         ]
 
 
@@ -157,7 +186,10 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
                             title:'Please Confirm',
                             onClose:async(res)=>{
                                 if(res){
-                                    await activateHeat(data?.uid);
+                                    await updateHeatStatus({
+                                        heat_id:data.uid,
+                                        status:HeatStatus.ACTIVE,
+                                    });
                                     refetch()
                                 }
                             }
@@ -170,13 +202,22 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
 
         if(
             data?.status===HeatStatus.READY
-            || data?.status===HeatStatus?.ACTIVE
         ){
             return [
                 defaults[1],
                 defaults[0],
                 defaults[4],
-                defaults[5]
+                defaults[5],
+
+            ]
+        }
+        if(data?.status===HeatStatus?.ACTIVE){
+            return [
+                defaults[1],
+                defaults[0],
+                defaults[4],
+                defaults[5],
+                defaults[7],
             ]
         }
 
@@ -184,7 +225,8 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
             return [
                 defaults[1],
                 defaults[2],
-                defaults[5]
+                defaults[5],
+                defaults[7],
             ]
         }
 
