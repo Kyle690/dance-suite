@@ -76,7 +76,7 @@ const Page: React.FC<pageType> = () => {
                 }}
             >
                 <Tab label={`Active Heats (${data?.active_heats?.length ?? 0})`}/>
-                <Tab label={'Upcoming Heats (${data?.active_heats?.length ?? 0})'}/>
+                <Tab label={`Upcoming Heats (${data?.upcoming_heats?.length ?? 0})`}/>
             </Tabs>
             <Divider sx={{ mt:-2, mb:2 }}/>
             {activeTab===0 && (

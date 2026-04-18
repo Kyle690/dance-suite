@@ -3,7 +3,8 @@ import { z } from "zod";
 const AdjudicatorMarksSchema = z.array(z.object({
     dancer_id:z.string(),
     dancer_number:z.number(),
-    dance:z.string()
+    dance:z.string(),
+    mark:z.number().optional()
 }))
 
 export const AdjudicatorMarksRoundSchema = z.object({

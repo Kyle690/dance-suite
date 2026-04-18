@@ -40,13 +40,6 @@ const HeatRoundReviewDialog: React.FC<DialogProps<HeatRoundReviewDialogProps, bo
 
     const dialogs = useDialogs()
 
-    //console.log('Round Review Data:', data);
-
-    /*
-    - ensure all the data is present 1st
-
-     */
-
     const allDataPresent = React.useMemo(()=>{
         if(!data)return false;
         const adjudicators = data?.panel?.panels_adjudicators || [];
@@ -157,7 +150,6 @@ const HeatRoundReviewDialog: React.FC<DialogProps<HeatRoundReviewDialogProps, bo
             }
         }
         mutate()
-
     }
 
 

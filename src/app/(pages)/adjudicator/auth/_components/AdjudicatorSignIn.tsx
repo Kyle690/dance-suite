@@ -83,7 +83,12 @@ const AdjudicatorSignIn: React.FC = () => {
             <Card sx={{ maxWidth: 440, width: '100%' }}>
                 <CardContent sx={{ p: 4 }}>
                     {isLoading ? (
-                        <Box>
+                        <Box
+                            width={'100%'}
+                            display="flex"
+                            justifyContent="center"
+                            alignItems="center"
+                        >
                             <CircularProgress/>
                         </Box>
                     ):(
