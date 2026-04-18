@@ -11,7 +11,7 @@ import {
     PlayArrowSharp,
     ChecklistSharp, ListAlt, PlayArrow,
 } from '@mui/icons-material';
-import { updateHeatStatus, deleteHeat } from "@/app/server/competitions";
+import { updateHeatStatus, deleteHeat, deleteMarks } from "@/app/server/competitions";
 import { useSnackbar } from "notistack";
 import HeatDialog from "@/app/components/dialogs/competition/section/HeatDialog";
 import HeatStartListDialog from "@/app/components/dialogs/competition/section/HeatStartListDialog";
@@ -68,7 +68,23 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
             {
                 label:'Delete Last Round',
                 icon:<FilterListOffRounded color={'error'}/>,
-                onClick:()=>{}
+                onClick:async()=>{
+                    if(!data) return;
+                    const confirmed = await dialogs.confirm(
+                        'Delete all marks for this heat? The heat will be reset to READY. This cannot be undone.',
+                        { title: 'Delete Round Marks?' }
+                    );
+                    if(!confirmed) return;
+                    const result = await deleteMarks(data.uid);
+                    if(result?.serverError){
+                        enqueueSnackbar(result.serverError, { variant: 'error' });
+                        return;
+                    }
+                    if(result?.data){
+                        enqueueSnackbar('Marks deleted', { variant: 'success' });
+                        refetch();
+                    }
+                }
             },
             {
                 label:'Review Marks',
@@ -265,7 +281,22 @@ const SectionHeatRowButtons: React.FC<SectionHeatRowButtonsProps> = ({
                 {
                     label:'Delete Marks',
                     icon:<Delete color={'error'}/>,
-                    onClick:async()=>{},
+                    onClick:async()=>{
+                        const confirmed = await dialogs.confirm(
+                            'Delete all marks for this heat? The heat will be reset to READY. This cannot be undone.',
+                            { title: 'Delete Round Marks?' }
+                        );
+                        if(!confirmed) return;
+                        const result = await deleteMarks(data.uid);
+                        if(result?.serverError){
+                            enqueueSnackbar(result.serverError, { variant: 'error' });
+                            return;
+                        }
+                        if(result?.data){
+                            enqueueSnackbar('Marks deleted', { variant: 'success' });
+                            refetch();
+                        }
+                    },
                 }
             ]
         }

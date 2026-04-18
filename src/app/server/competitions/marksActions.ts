@@ -2,7 +2,7 @@ import { safeAction } from "@/app/lib/safeAction";
 import { RoundMarkSchema, FinalMarkSchema } from "@/app/schemas/MarksSchemas";
 import { groupBy, keys, forEach, sortBy, flatten } from "lodash";
 import { prisma } from "@/app/lib/prisma";
-import { CompetitionLogEventType, HeatMarkInputType, HeatStatus } from "@prisma/client";
+import { CompetitionLogEventType, HeatMarkInputType, HeatStatus, SectionStatus } from "@prisma/client";
 import { UidSchema } from "@/app/schemas/CommonSchema";
 import { SectionHeatRoundResultSchema, FinalResultSchema } from "@/app/schemas/SectionSchema";
 import { getCompetitionUser } from "@/app/server/competitions/competitionActions";
@@ -405,24 +405,139 @@ export const createHeatResult = safeAction.inputSchema(SectionHeatRoundResultSch
 })
 
 
-export const deleteMarks =safeAction.inputSchema(UidSchema).action(async({ parsedInput, ctx })=>{
-
-    const deletedMarks = await prisma.heat_marks.deleteMany({
-        where:{
-            heat_id:parsedInput,
+// Delete ALL mark submissions for a heat and reset it back to JUDGING
+// Returns the next heat in the same section that has progressed past DRAFT, if any
+async function getBlockingNextHeat(heatId: string) {
+    const heat = await prisma.heat.findUnique({
+        where: { uid: heatId },
+        select: { section_id: true, order: true, item_no: true },
+    });
+    if (!heat) return null;
+    return prisma.heat.findFirst({
+        where: {
+            section_id: heat.section_id,
+            uid: { not: heatId },
+            status: { not: HeatStatus.DRAFT },
+            ...(heat.order != null
+                ? { order: { gt: heat.order } }
+                : { item_no: { gt: heat.item_no } }),
         },
-    })
+        select: { uid: true, item_no: true, status: true },
+    });
+}
 
-    // const deleteHeatResult = await prisma.heat_result.delete({
-    //     where:{
-    //         heat_id:parsedInput,
-    //     },
-    // })
+export const deleteMarks = safeAction.inputSchema(UidSchema).action(async ({ parsedInput, ctx }) => {
 
+    const competitionUser = await getCompetitionUser({
+        userId: ctx.user.id,
+        competitionId: String(ctx.competition_id),
+    });
 
+    const heat = await prisma.heat.findUnique({
+        where: { uid: parsedInput },
+        select: { uid: true, status: true, item_no: true },
+    });
 
+    if (!heat) throw new Error('Heat not found');
 
-})
+    const blockingHeat = await getBlockingNextHeat(parsedInput);
+    if (blockingHeat) {
+        throw new Error(`Marks cannot be deleted — heat ${blockingHeat.item_no} has already progressed (${blockingHeat.status}). Delete or reset that heat first.`);
+    }
+
+    // Delete all mark submissions (child marks rows cascade automatically)
+    await prisma.heat_marks.deleteMany({ where: { heat_id: parsedInput } });
+
+    // Delete heat result if one was recorded (heat_result_dancer cascades)
+    await prisma.heat_result.deleteMany({ where: { heat_id: parsedInput } });
+
+    return prisma.heat.update({
+        where: { uid: parsedInput },
+        data: {
+            status: HeatStatus.READY,
+            reviewed_at: null,
+            reviewed_by_id: null,
+            competition_log: {
+                create: {
+                    event_type: CompetitionLogEventType.HEAT_JUDGING,
+                    competition_id: String(ctx.competition_id),
+                    user_id: competitionUser?.data?.uid ?? null,
+                    note: `All marks deleted for heat ${heat.item_no} by ${ctx.user.name ?? 'Unknown User'}. Heat reset to JUDGING.`,
+                },
+            },
+        },
+        select: { uid: true, status: true, item_no: true },
+    });
+});
+
+// Delete a single adjudicator's mark submission by heat_marks.uid
+export const deleteAdjudicatorMarks = safeAction.inputSchema(UidSchema).action(async ({ parsedInput, ctx }) => {
+
+    const competitionUser = await getCompetitionUser({
+        userId: ctx.user.id,
+        competitionId: String(ctx.competition_id),
+    });
+
+    const heatMark = await prisma.heat_marks.findUnique({
+        where: { uid: parsedInput },
+        include: {
+            adjudicator: { select: { letter: true, name: true } },
+            heat: { select: { uid: true, item_no: true, status: true } },
+        },
+    });
+
+    if (!heatMark) throw new Error('Mark submission not found');
+
+    const blockingHeat = await getBlockingNextHeat(heatMark.heat_id);
+    if (blockingHeat) {
+        throw new Error(`Marks cannot be deleted — heat ${blockingHeat.item_no} has already progressed (${blockingHeat.status}). Delete or reset that heat first.`);
+    }
+
+    // Delete the submission (child marks rows cascade automatically)
+    await prisma.heat_marks.delete({ where: { uid: parsedInput } });
+
+    // Check if any submissions remain for this heat
+    const remainingCount = await prisma.heat_marks.count({ where: { heat_id: heatMark.heat_id } });
+
+    if (remainingCount === 0) {
+        // No marks left — delete the heat result too and reset to JUDGING
+        await prisma.heat_result.deleteMany({ where: { heat_id: heatMark.heat_id } });
+
+        return prisma.heat.update({
+            where: { uid: heatMark.heat_id },
+            data: {
+                status: HeatStatus.JUDGING,
+                reviewed_at: null,
+                reviewed_by_id: null,
+                competition_log: {
+                    create: {
+                        event_type: CompetitionLogEventType.HEAT_JUDGING,
+                        competition_id: String(ctx.competition_id),
+                        user_id: competitionUser?.data?.uid ?? null,
+                        note: `Marks deleted for adjudicator ${heatMark.adjudicator.letter} (${heatMark.adjudicator.name}) on heat ${heatMark.heat.item_no}. No submissions remain — heat reset to JUDGING.`,
+                    },
+                },
+            },
+            select: { uid: true, status: true, item_no: true },
+        });
+    }
+
+    // Some submissions still exist — log the deletion but leave status as-is
+    await prisma.competition_log.create({
+        data: {
+            event_type: CompetitionLogEventType.HEAT_MARKS_ENTERED,
+            competition_id: String(ctx.competition_id),
+            user_id: competitionUser?.data?.uid ?? null,
+            heat_id: heatMark.heat_id,
+            note: `Marks deleted for adjudicator ${heatMark.adjudicator.letter} (${heatMark.adjudicator.name}) on heat ${heatMark.heat.item_no} by ${ctx.user.name ?? 'Unknown User'}.`,
+        },
+    });
+
+    return prisma.heat.findUnique({
+        where: { uid: heatMark.heat_id },
+        select: { uid: true, status: true, item_no: true },
+    });
+});
 
 export const getHeatRoundResult = safeAction.inputSchema(UidSchema).action(async({ parsedInput })=>{
 
@@ -725,6 +840,21 @@ export const approveHeatResult = safeAction.inputSchema(UidSchema).action(async 
         }
     }
 
+    // Check if all heats in the section are now COMPLETE — if so, mark the section complete
+    const incompleteHeatCount = await prisma.heat.count({
+        where: {
+            section_id: completedHeat.section_id,
+            status: { notIn: [ HeatStatus.COMPLETE, HeatStatus.CANCELED ] },
+        },
+    });
+
+    if (incompleteHeatCount === 0) {
+        await prisma.sections.update({
+            where: { uid: completedHeat.section_id },
+            data: { status: SectionStatus.COMPLETE },
+        });
+    }
+
     return { uid: completedHeat.uid, status: completedHeat.status, checked_at: completedHeat.checked_at };
 });
 
@@ -787,4 +917,6 @@ export default {
     getHeatRoundResult,
     approveHeatResult,
     approveFinalResult,
+    deleteMarks,
+    deleteAdjudicatorMarks,
 }

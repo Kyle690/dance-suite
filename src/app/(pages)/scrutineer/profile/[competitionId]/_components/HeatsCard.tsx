@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { getCompetitionHeats } from "@/app/server/competitions";
 import { Card, CardContent, Chip, Stack } from '@mui/material';
@@ -9,9 +9,13 @@ import { orderBy, startCase, toLower } from 'lodash';
 import { getHeatStatusColor, getHeatTypeColor } from "@/app/utils/heatUtils";
 import SectionHeatRowButtons from "@/app/components/dialogs/competition/section/_components/SectionHeatRowButtons";
 import { useParams } from "next/navigation";
+import { HeatStatus } from "@prisma/client";
+
+const ALL_STATUSES = Object.values(HeatStatus);
 
 const HeatsCard = () => {
     const { competitionId } = useParams<{ competitionId: string }>();
+    const [ activeFilters, setActiveFilters ] = useState<HeatStatus[]>([]);
 
     const { data, isLoading, refetch } = useQuery({
         queryKey: [ 'competition-heats', competitionId ],
@@ -22,6 +26,23 @@ const HeatsCard = () => {
             return [];
         },
     });
+
+    const toggleFilter = (status: HeatStatus) => {
+        setActiveFilters((prev) =>
+            prev.includes(status) ? prev.filter((s) => s !== status) : [ ...prev, status ]
+        );
+    };
+
+    const visibleStatuses = useMemo(() => {
+        if (!data) return new Set<HeatStatus>();
+        return new Set(data.map((h: any) => h.status as HeatStatus));
+    }, [ data ]);
+
+    const filteredRows = useMemo(() => {
+        if (!data) return [];
+        if (activeFilters.length === 0) return data;
+        return data.filter((h: any) => activeFilters.includes(h.status));
+    }, [ data, activeFilters ]);
 
     return (
         <Card
@@ -42,6 +63,24 @@ const HeatsCard = () => {
                     pb: '16px !important',
                 }}
             >
+                {/* Status filter chips */}
+                <Stack direction={'row'} spacing={1} flexWrap={'wrap'} mb={1.5} useFlexGap>
+                    {ALL_STATUSES.filter((s) => visibleStatuses.has(s)).map((status) => {
+                        const active = activeFilters.includes(status);
+                        return (
+                            <Chip
+                                key={status}
+                                label={startCase(toLower(status))}
+                                size={'small'}
+                                color={active ? getHeatStatusColor(status) : 'default'}
+                                variant={active ? 'filled' : 'outlined'}
+                                onClick={() => toggleFilter(status)}
+                                sx={{ cursor: 'pointer' }}
+                            />
+                        );
+                    })}
+                </Stack>
+
                 <DataGrid
                     columns={[
                         {
@@ -137,7 +176,7 @@ const HeatsCard = () => {
                             ),
                         },
                     ]}
-                    rows={data || []}
+                    rows={filteredRows}
                     getRowId={(row) => row?.uid}
                     showToolbar
                     loading={isLoading}

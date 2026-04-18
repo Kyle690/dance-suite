@@ -44,6 +44,11 @@ enum SectionEntryType {
   GROUP
 }
 
+enum SectionStatus {
+  ACTIVE
+  COMPLETE
+}
+
 model sections {
   uid              String            @id @unique @default(uuid()) @db.Uuid
   created          DateTime          @default(now())
@@ -51,6 +56,7 @@ model sections {
   competition_id   String?           @db.Uuid
   competition      competition?      @relation(fields: [competition_id], references: [uid])
   name             String?
+  status           SectionStatus     @default(ACTIVE)
   age_group        SectionAgeGroup?
   level            SectionLevel?
   entry_type       SectionEntryType?

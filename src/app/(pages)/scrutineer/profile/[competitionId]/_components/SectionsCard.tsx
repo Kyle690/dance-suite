@@ -12,7 +12,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import SectionDialog from "@/app/components/dialogs/competition/section/SectionDialog";
 import { startCase, toLower } from "lodash";
 import { Chip } from "@mui/material";
-import { getEntryTypeColor, getCompetitiveTypeColor } from "@/app/utils/heatUtils";
+import { getEntryTypeColor, getCompetitiveTypeColor, getSectionStatusColor } from "@/app/utils/heatUtils";
 
 
 type SectionsCardProps = {}
@@ -115,6 +115,20 @@ const SectionsCard: React.FC<SectionsCardProps> = () => {
                                     label={startCase(toLower(params.value.replace('_', ' ')))}
                                     size="small"
                                     color={getCompetitiveTypeColor(params.value)}
+                                />
+                            ) : null,
+                        },
+                        {
+                            field:'status',
+                            headerName:'Status',
+                            flex:1,
+                            align:'center',
+                            headerAlign:'center',
+                            renderCell:(params)=> params.value ? (
+                                <Chip
+                                    label={startCase(toLower(params.value))}
+                                    size="small"
+                                    color={getSectionStatusColor(params.value)}
                                 />
                             ) : null,
                         },

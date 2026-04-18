@@ -34,7 +34,7 @@ import {DialogProps, useDialogs} from '@toolpad/core';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
 import { useSnackbar } from 'notistack';
 import { sortBy, startCase, toLower } from 'lodash';
-import {approveHeatResult, getHeatRoundMarks, printFinalResult} from '@/app/server/competitions';
+import { approveHeatResult, deleteAdjudicatorMarks, deleteMarks, getHeatRoundMarks, printFinalResult } from '@/app/server/competitions';
 import { buildSkatingResults, DanceResult, RawMarkEntry } from '@/app/lib/skating';
 import { FinalPrintMode } from '@/app/components/pdf/HeatFinalResultDocument';
 import {HeatStatus} from "@prisma/client";
@@ -59,7 +59,61 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
     const [ menuOpen, setMenuOpen ] = useState(false);
     const [ approving, setApproving ] = useState(false);
     const [ selectedSubmission, setSelectedSubmission ] = useState<NonNullable<typeof data>['mark_submissions'][number] | null>(null);
+    const [ deleting, setDeleting ] = useState(false);
     const anchorRef = useRef<HTMLDivElement>(null);
+
+    const handleDeleteSubmission = useCallback(async () => {
+        if (!selectedSubmission) return;
+        const confirmed = await dialogs.confirm(
+            `Delete the mark submission from adjudicator ${selectedSubmission.adjudicator_letter} (${selectedSubmission.adjudicator_name})? This cannot be undone.`,
+            { title: 'Delete Submission?' }
+        );
+        if (!confirmed) return;
+        setDeleting(true);
+        try {
+            const result = await deleteAdjudicatorMarks(selectedSubmission.uid);
+            if (result?.serverError) {
+                enqueueSnackbar(result.serverError, { variant: 'error' });
+                return;
+            }
+            if (result?.data) {
+                enqueueSnackbar('Submission deleted', { variant: 'success' });
+                setSelectedSubmission(null);
+                await queryClient.invalidateQueries({ queryKey: [ 'get-final-result-data', payload.heat_id ] });
+                await queryClient.invalidateQueries({ queryKey: [ 'section-heats' ] });
+            }
+        } catch {
+            enqueueSnackbar('Failed to delete submission', { variant: 'error' });
+        } finally {
+            setDeleting(false);
+        }
+    }, [ selectedSubmission,  enqueueSnackbar, payload.heat_id ]);
+
+    const handleDeleteAllMarks = useCallback(async () => {
+        const confirmed = await dialogs.confirm(
+            'Delete all mark submissions for this heat? The heat will be reset to JUDGING. This cannot be undone.',
+            { title: 'Delete All Marks?' }
+        );
+        if (!confirmed) return;
+        setDeleting(true);
+        try {
+            const result = await deleteMarks(payload.heat_id);
+            if (result?.serverError) {
+                enqueueSnackbar(result.serverError, { variant: 'error' });
+                return;
+            }
+            if (result?.data) {
+                enqueueSnackbar('All marks deleted', { variant: 'success' });
+                await queryClient.invalidateQueries({ queryKey: [ 'get-final-result-data', payload.heat_id ] });
+                await queryClient.invalidateQueries({ queryKey: [ 'section-heats' ] });
+                onClose();
+            }
+        } catch {
+            enqueueSnackbar('Failed to delete marks', { variant: 'error' });
+        } finally {
+            setDeleting(false);
+        }
+    }, [ payload.heat_id,  enqueueSnackbar,  onClose ]);
 
     // ── Data loading ──────────────────────────────────────────────────────────
     const { data, isLoading } = useQuery({
@@ -411,9 +465,23 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
                             <>
                                 <Divider />
                                 <Stack spacing={1}>
-                                    <Typography variant={'subtitle2'} color={'text.secondary'}>
-                                        Mark Submissions
-                                    </Typography>
+                                    <Stack direction={'row'} alignItems={'center'} justifyContent={'space-between'}>
+                                        <Typography variant={'subtitle2'} color={'text.secondary'}>
+                                            Mark Submissions
+                                        </Typography>
+                                        {data?.status !== 'COMPLETE' && (
+                                            <Button
+                                                size={'small'}
+                                                color={'error'}
+                                                variant={'outlined'}
+                                                disabled={deleting}
+                                                startIcon={deleting ? <CircularProgress size={14} /> : undefined}
+                                                onClick={handleDeleteAllMarks}
+                                            >
+                                                Delete All Marks
+                                            </Button>
+                                        )}
+                                    </Stack>
                                     <TableContainer component={Paper} variant={'outlined'}>
                                         <Table size={'small'}>
                                             <TableHead>
@@ -647,6 +715,16 @@ const HeatFinalResultDialog: React.FC<DialogProps<HeatFinalResultDialogProps>> =
                         </Stack>
                     </DialogContent>
                     <DialogActions>
+                        <Button
+                            size={'small'}
+                            variant={'outlined'}
+                            color={'error'}
+                            disabled={deleting}
+                            startIcon={deleting ? <CircularProgress size={14} /> : undefined}
+                            onClick={handleDeleteSubmission}
+                        >
+                            Delete Submission
+                        </Button>
                         <Button size={'small'} variant={'contained'} color={'inherit'} onClick={() => setSelectedSubmission(null)}>
                             Close
                         </Button>

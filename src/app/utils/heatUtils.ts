@@ -1,4 +1,4 @@
-import { CompetitiveType, HeatStatus, HeatType, SectionEntryType } from "@prisma/client";
+import { CompetitiveType, HeatStatus, HeatType, SectionEntryType, SectionStatus } from "@prisma/client";
 import { ChipProps } from "@mui/material";
 
 type ChipColor = ChipProps['color'];
@@ -54,6 +54,17 @@ export const getEntryTypeColor = (type: SectionEntryType): ChipColor => {
     case SectionEntryType.COUPLE:
         return 'primary';
     case SectionEntryType.GROUP:
+        return 'success';
+    default:
+        return 'default';
+    }
+};
+
+export const getSectionStatusColor = (status: SectionStatus): ChipColor => {
+    switch (status) {
+    case SectionStatus.ACTIVE:
+        return 'info';
+    case SectionStatus.COMPLETE:
         return 'success';
     default:
         return 'default';
