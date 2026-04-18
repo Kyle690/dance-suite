@@ -31,3 +31,26 @@ export const createMarksChecksum=(params: {
     const secret = process.env.MARKS_CHECKSUM_SECRET || 'dance-suite-marks-secret';
     return crypto.createHmac('sha256', secret).update(canonical).digest('hex');
 }
+
+export const verifyMarksChecksum = (params: {
+    heat_id: string;
+    adjudicator_id: string;
+    marks: Array<{ dancer_id: string; dancer_number: number; dance: string }>;
+    signature: string;
+    ip_address: string;
+    timestamp: Date;
+    stored_checksum: string;
+}): boolean => {
+    const expected = createMarksChecksum({
+        heat_id: params.heat_id,
+        adjudicator_id: params.adjudicator_id,
+        marks: params.marks,
+        signature: params.signature,
+        ip_address: params.ip_address,
+        timestamp: params.timestamp,
+    });
+    return crypto.timingSafeEqual(
+        Buffer.from(expected, 'hex'),
+        Buffer.from(params.stored_checksum, 'hex')
+    );
+}

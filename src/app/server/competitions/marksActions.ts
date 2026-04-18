@@ -7,6 +7,7 @@ import { UidSchema } from "@/app/schemas/CommonSchema";
 import { SectionHeatRoundResultSchema, FinalResultSchema } from "@/app/schemas/SectionSchema";
 import { getCompetitionUser } from "@/app/server/competitions/competitionActions";
 import { TableCellProps } from "@mui/material/TableCell";
+import { verifyMarksChecksum } from "@/app/server/adjudicator/utils";
 
 
 export const submitRoundMarks = safeAction.inputSchema(RoundMarkSchema).action(async({
@@ -184,6 +185,7 @@ export const getHeatRoundMarks = safeAction.inputSchema(UidSchema).action(async(
             },
             heat_marks:{
                 include:{
+                    adjudicator:true,
                     marks:{ include:{ dancer:true } }
                 }
             },
@@ -211,6 +213,38 @@ export const getHeatRoundMarks = safeAction.inputSchema(UidSchema).action(async(
     return {
         ...result,
         start_list: result.start_list.map((hd)=>hd.dancer),
+        mark_submissions: result.heat_marks.map((hm) => ({
+            uid: hm.uid,
+            adjudicator_letter: hm.adjudicator?.letter ?? '?',
+            adjudicator_name: hm.adjudicator?.name ?? 'Unknown',
+            input_type: hm.input_type,
+            submitted_at: hm.submitted_at ?? hm.created,
+            ip_address: hm.ip_address ?? null,
+            signature: hm.signature ?? null,
+            marks: hm.marks.map((m) => ({
+                dancer_id: m.dancer_id,
+                dancer_number: m.dancer_number,
+                dancer_name: m.dancer?.name ?? null,
+                dance: m.dance,
+                mark: m.mark ?? null,
+            })),
+            checksum_valid: (() => {
+                if (!hm.check_sum || !hm.signature || !hm.ip_address) return null;
+                try {
+                    return verifyMarksChecksum({
+                        heat_id: hm.heat_id,
+                        adjudicator_id: hm.adjudicator_id,
+                        marks: hm.marks.flatMap((m) => m.dancer_id ? [ { dancer_id: m.dancer_id, dancer_number: m.dancer_number, dance: m.dance } ] : []),
+                        signature: hm.signature,
+                        ip_address: hm.ip_address,
+                        timestamp: hm.submitted_at || hm.created,
+                        stored_checksum: hm.check_sum,
+                    });
+                } catch {
+                    return false;
+                }
+            })(),
+        })),
     };
 })
 
@@ -408,6 +442,7 @@ export const getHeatRoundResult = safeAction.inputSchema(UidSchema).action(async
             },
             heat_marks:{
                 include:{
+                    adjudicator:true,
                     marks:{
                         include:{
                             dancer:true
@@ -577,7 +612,38 @@ export const getHeatRoundResult = safeAction.inputSchema(UidSchema).action(async
             organization: heat?.section?.competition?.organization ?? null,
         },
         heat_status: heat?.status ?? null,
-        panel:adjudicators,
+        panel: adjudicators,
+        mark_submissions: (heat?.heat_marks ?? []).map((hm) => ({
+            uid: hm.uid,
+            adjudicator_letter: hm.adjudicator?.letter ?? '?',
+            adjudicator_name: hm.adjudicator?.name ?? 'Unknown',
+            input_type: hm.input_type,
+            submitted_at: hm.submitted_at ?? hm.created,
+            ip_address: hm.ip_address ?? null,
+            signature: hm.signature ?? null,
+            marks: hm.marks.map((m) => ({
+                dancer_id: m.dancer_id,
+                dancer_number: m.dancer_number,
+                dancer_name: m.dancer?.name ?? null,
+                dance: m.dance,
+            })),
+            checksum_valid: (() => {
+                if (!hm.check_sum  || !hm.signature || !hm.ip_address) return null;
+                try {
+                    return verifyMarksChecksum({
+                        heat_id: hm.heat_id,
+                        adjudicator_id: hm.adjudicator_id,
+                        marks: hm.marks.flatMap((m) => m.dancer_id ? [ { dancer_id: m.dancer_id, dancer_number: m.dancer_number, dance: m.dance } ] : []),
+                        signature: hm.signature,
+                        ip_address: hm.ip_address,
+                        timestamp: hm.submitted_at || hm.created,
+                        stored_checksum: hm.check_sum,
+                    });
+                } catch {
+                    return false;
+                }
+            })(),
+        })),
         called_back_dancers: allDancers
             .filter((d)=>d.callback)
             .map((d)=>({

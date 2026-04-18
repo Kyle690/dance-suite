@@ -73,13 +73,14 @@ export const getAdjudicatorHeat = adjudicatorSafeAction.inputSchema(UidSchema).a
 export const submitAdjudicatorHeatMarks = adjudicatorSafeAction.inputSchema(AdjudicatorMarksRoundSchema).action(async({ ctx, parsedInput })=>{
     const adjudicatorId = ctx.adjudicator.id;
 
+    const submittedAt = dayjs().toDate();
     const checksum = createMarksChecksum({
         heat_id:parsedInput.heat_id,
         adjudicator_id:adjudicatorId,
         signature:parsedInput.signature,
         ip_address:ctx.ip,
         marks:parsedInput.marks,
-        timestamp:dayjs().toDate()
+        timestamp:submittedAt
     })
 
 
@@ -91,6 +92,7 @@ export const submitAdjudicatorHeatMarks = adjudicatorSafeAction.inputSchema(Adju
             input_type:HeatMarkInputType.JUDGE,
             ip_address:ctx.ip,
             check_sum:checksum,
+            submitted_at:submittedAt,
             marks:{
                 createMany:{
                     data:parsedInput.marks

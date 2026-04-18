@@ -14,6 +14,7 @@ model heat_marks {
   ip_address     String?
   signature      String?
   check_sum      String?
+  submitted_at   DateTime?
   input_type     HeatMarkInputType  @default(JUDGE)
   scrutineer_id  String?            @db.Uuid
   scrutineer     competition_users? @relation(fields: [scrutineer_id], references: [uid])
