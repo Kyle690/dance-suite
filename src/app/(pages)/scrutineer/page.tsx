@@ -10,7 +10,7 @@ const Page: React.FC<pageType> = async() => {
 
     console.log('user scrutineer', user);
 
-    redirect(user?"/scrutineer/profile":"scrutineer/auth");
+    redirect(user?"/scrutineer/competitions":"scrutineer/auth");
 
 
 };

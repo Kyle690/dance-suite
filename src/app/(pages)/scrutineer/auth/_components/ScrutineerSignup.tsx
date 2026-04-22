@@ -52,7 +52,7 @@ const ScrutineerSignup: React.FC<ScrutineerSignupType> = ({
         mutationFn:async(data:SignUpFormType)=>scrutineerSignUp(data),
         mutationKey:[ 'scrutineerSignUp' ],
         onSuccess:()=>{
-            router.replace('/scrutineer/profile')
+            router.replace('/scrutineer/competitions')
         },
         onError:(error)=>{
             console.log('Error signing up',error);

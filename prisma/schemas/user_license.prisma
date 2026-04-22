@@ -2,6 +2,7 @@ enum LicenseType {
   FREE
   PRO
   ENTERPRISE
+  LIFETIME
 }
 
 model user_license {

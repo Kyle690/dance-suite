@@ -36,6 +36,14 @@ export const NewPasswordSchema = z.object({
 
 export type NewPasswordFormType = z.infer<typeof NewPasswordSchema>;
 
+export const UpdateProfileSchema = z.object({
+    first_name: z.string().min(1, 'First name is required'),
+    last_name: z.string().min(1, 'Last name is required'),
+    phone: z.string().optional(),
+});
+
+export type UpdateProfileFormType = z.infer<typeof UpdateProfileSchema>;
+
 export const AdjudicatorSignInSchema = z.object({
     competition_id: z.uuid(),
     login_code: z.string()

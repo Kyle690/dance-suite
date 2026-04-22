@@ -14,8 +14,8 @@ const RootLayout=({
   children: React.ReactNode;
 }>)=> {
     return (
-        <html lang="en" >
-            <body>
+        <html lang="en" suppressHydrationWarning>
+            <body suppressHydrationWarning>
                 <AppRouterCacheProvider options={{ enableCssLayer: true }}>
                     <App>
                         {children}

@@ -54,7 +54,7 @@ const ScrutineerSignIn: React.FC<ScrutineerSignInType> = ({
             if (authError) throw authError;
 
             if (authData.user) {
-                router.replace('/scrutineer/profile')
+                router.replace('/scrutineer/competitions')
             }
         } catch (err: any) {
             setError(err.message || 'An error occurred during sign in');

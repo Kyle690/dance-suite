@@ -18,6 +18,10 @@ model users {
   deleted_at           DateTime?
   deleted_by_id        String?     @db.Uuid
   completed_onboarding Boolean     @default(false)
+  approved             Boolean     @default(false)
+  approved_at          DateTime?
+  approved_by_id       String?     @db.Uuid
+  approved_reason      String?
 
   user_licenses     user_license[]
   competition_users competition_users[]

@@ -1,8 +1,8 @@
 'use client';
 import React, { useMemo, useState } from 'react';
 import { Tabs, Tab, Divider, Stack } from "@mui/material";
-import SectionsCard from "@/app/(pages)/scrutineer/profile/[competitionId]/_components/SectionsCard";
-import HeatsCard from "@/app/(pages)/scrutineer/profile/[competitionId]/_components/HeatsCard";
+import SectionsCard from "@/app/(pages)/scrutineer/competitions/[competitionId]/_components/SectionsCard";
+import HeatsCard from "@/app/(pages)/scrutineer/competitions/[competitionId]/_components/HeatsCard";
 import MenuButtons, { MenuButtonsProps } from "@/app/components/layout/MenuButtons";
 import { useDialogs } from "@toolpad/core";
 import { AddCircle } from "@mui/icons-material";

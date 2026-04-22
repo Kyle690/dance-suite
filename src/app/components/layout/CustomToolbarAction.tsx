@@ -132,7 +132,7 @@ const CustomToolbarAction:React.FC<CustomToolbarActionProps> =({
             </Tooltip>
             <Tooltip title={'Close Competition'}>
                 <IconButton
-                    onClick={()=>router.push('/scrutineer/profile')}
+                    onClick={()=>router.push('/scrutineer/competitions')}
                 >
                     <ExitToAppOutlined/>
                 </IconButton>

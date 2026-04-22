@@ -38,7 +38,7 @@ const ScrutineerNewPassword: React.FC = () => {
                 password: data.password,
             });
             if (updateError) throw updateError;
-            router.replace('/scrutineer/profile');
+            router.replace('/scrutineer/competitions');
         } catch (err: any) {
             setError(err.message || 'An error occurred. Please try again.');
         }

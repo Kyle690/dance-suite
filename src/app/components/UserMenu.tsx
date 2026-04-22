@@ -11,7 +11,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import { Logout, Person } from '@mui/icons-material';
+import { Logout, Person, Checklist } from '@mui/icons-material';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import MenuButtons from "@/app/components/layout/MenuButtons";
@@ -87,6 +87,12 @@ const UserMenu=()=> {
                       <Person fontSize="small" />
                   </ListItemIcon>
                   <ListItemText>Profile</ListItemText>
+              </MenuItem>
+              <MenuItem onClick={() => router.push('/scrutineer/competitions')}>
+                  <ListItemIcon>
+                      <Checklist fontSize={'small'}/>
+                  </ListItemIcon>
+                  <ListItemText>Competitions</ListItemText>
               </MenuItem>
               <MenuItem onClick={handleSignOut}>
                   <ListItemIcon>
